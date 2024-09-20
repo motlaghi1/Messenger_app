@@ -23,42 +23,22 @@ This use case describes the process of a user logging into the messenger applica
 
 4.  The user clicks the "Login" button.
 
-5.  The system validates the username
+5.  The system validates the username.
 
 6.  The system logs the user in.
 
-7.  The system redirects the user to their message dashboard
+7.  The system retrieves the user's message information.
+
+7.  The system redirects the user to their message dashboard.
 
 ### Alternative Flows:
 
-4a. The inputted username is not registered in the system
+4a. The inputted username is not registered in the system.
 
-1.  The system is not able to retrieve any data for the inputted
-    username
+1.  The system creates a new database entry for the inputted username.
 
-2.  The system outputs an error: "User not found."
+2.  The use case resumes at step 6.
 
-3.  The use case resumes at step 3.
-
-
-2a. The user has not created a user account.
-
-1.  User clicks on the "Create Account" button.
-
-2.  The system redirects the user to the account creation form.
-
-3.  The user inputs a new username.
-
-4.  The user clicks the "Create" button.
-
-5.  The system validates inputted username and checks against database
-    for collisions.
-
-6.  The system saves new username.
-
-7.  The system redirects user to login page.
-
-8.  Resume use case at step 2.
 
 ### Postconditions:
 
