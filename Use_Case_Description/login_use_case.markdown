@@ -2,8 +2,8 @@
 ---
 ### Actor: User
 
-### Description: This use case describes the process of a user logging into
-the messenger application.
+### Description: 
+This use case describes the process of a user logging into the messenger application.
 
 ### Preconditions:
 
@@ -40,6 +40,7 @@ the messenger application.
 
 3.  The use case resumes at step 3.
 
+
 2a. The user has not created a user account.
 
 1.  User clicks on the "Create Account" button.
@@ -59,7 +60,7 @@ the messenger application.
 
 8.  Resume use case at step 2.
 
-Postconditions:
+### Postconditions:
 
 -   The user is successfully logged into the system.
 
