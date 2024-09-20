@@ -1,11 +1,11 @@
-Use Case: User Login
+# Use Case: User Login
+---
+### Actor: User
 
-Actor: User
-
-Description: This use case describes the process of a user logging into
+### Description: This use case describes the process of a user logging into
 the messenger application.
 
-Preconditions:
+### Preconditions:
 
 -   The user is not currently logged in.
 
@@ -13,7 +13,7 @@ Preconditions:
 
 -   The user has network connectivity
 
-Main Flow:
+### Main Flow:
 
 1.  The user navigates to the login page.
 
@@ -29,7 +29,7 @@ Main Flow:
 
 7.  The system redirects the user to their message dashboard
 
-Alternative Flows:
+### Alternative Flows:
 
 4a. The inputted username is not registered in the system
 
