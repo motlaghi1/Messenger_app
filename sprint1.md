@@ -2,11 +2,11 @@
 <div id="AD">
     <h3>Activity Diagram</h3>
     <h4>Login Activity Diagram</h4>
-    <img src="Activity_Diagram/Login Activity Diagram (1).png" alt="LAD" style="height: 300px; weight: 300px;"/>
+    <img src="Assets/Activity_Diagram/Login Activity Diagram (1).png" alt="LAD" style="height: 300px; weight: 300px;"/>
     <br/>
     <h4>Send Message Activity Diagram</h4>
-    <img src="Activity_Diagram/send message activity diagram (1).png" alt="SMAD" style="height: 300px; weight: 300px;"/>
+    <img src="Assets/Activity_Diagram/send message activity diagram (1).png" alt="SMAD" style="height: 300px; weight: 300px;"/>
     <br/>
     <h4>Reveive Message Activity Diagram</h4>
-    <img src="Activity_Diagram/receive message activity diagram (1).png" alt="RMAD" style="height: 300px; weight: 300px;"/>
+    <img src="Assets/Activity_Diagram/receive message activity diagram (1).png" alt="RMAD" style="height: 300px; weight: 300px;"/>
 </div>
