@@ -15,6 +15,8 @@ This use case describes the process of a user sending a message directly to a si
 
 -   The messaging feature is available
 
+-   The message recipient is a registered user.
+
 ### Main Flow:
 
 1.  The user selects a user to direct message from their main dashboard.
@@ -30,7 +32,9 @@ This use case describes the process of a user sending a message directly to a si
 
 6.  The system clears the input field.
 
-7.  The system sends the user's message to the selected recipient.
+7.  The system pushes the user's message to the database.
+
+8.  The system displays the sent message in the current message stream.
 
 ### Alternative Flows:
 

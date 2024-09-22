@@ -30,7 +30,7 @@ Main Flow:
 
 6.  The system clears the input area.
 
-7.  The system sends the user's message to the text channel.
+7.  The system pushes the sent message to the respective table in the message database.
 
 Alternative Flows:
 
