@@ -240,3 +240,16 @@ This use case describes the process of a user sending a message to a text channe
 -   The user's inputted message is successfully sent to the specified text channel.
 
 -   The message is displayed in the channel's message stream.
+
+---
+
+## Trello Screenshots
+
+#### Beginning:
+![](/Assets/Trello_Screenshots/Sprint_1_beginning.JPG)
+
+#### Middle:
+![](/Assets/Trello_Screenshots/Sprint_1_middle.png)
+
+#### End:
+![](/Assets/Trello_Screenshots/Sprint_1_end.png)
