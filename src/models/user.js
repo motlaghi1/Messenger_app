@@ -23,18 +23,15 @@ userSchema.pre("save", async function (next) {
 });
 
 //Compare password 
-userSchema.methods.comparePassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model("user", userSchema);
 
 // Find user by credentials
 async function findUser(id, password) {
-    userSchema.methods.comparePassword = async function (password) {
-        return await bcrypt.compare(password, this.password);
-    };
-    return await User.findOne({ id, password });
+    return await User.findOne({ id, password });   
 }
 
 // Find user by ID

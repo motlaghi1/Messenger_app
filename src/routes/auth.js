@@ -18,7 +18,7 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        const user = await userModel.findUserbyId(id);
+        const user = await userModel.findUserById(id);
         if (!user) {
             return res.render('login', { message: "Invalid credentials!!" });
         }
@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
         //compare hashed password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.render('login', { message: "Invalid credentials!!" });
+            return res.render('login', { message: "Invalid credentials!" });
         }
 
         req.session.user = user;
