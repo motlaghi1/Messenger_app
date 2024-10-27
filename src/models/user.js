@@ -1,14 +1,39 @@
 const mongoose = require('mongoose');
+//Bycrypt
+const bcrypt = require('bcrypt');
+const saltRounds = 10; 
+
 
 const userSchema = mongoose.Schema({
     id: String,
     password: String
 });
 
+//hashing password pre save
+userSchema.pre("save", async function (next) {
+    const user = this;
+    if (!user.isModified("password")) return next();
+    try{
+        user.password = await bcrypt.hash(user.password, saltRounds);
+        next();
+    }
+    catch(err){
+        next(err);
+    }
+});
+
+//Compare password 
+userSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
+
 const User = mongoose.model("user", userSchema);
 
 // Find user by credentials
 async function findUser(id, password) {
+    userSchema.methods.comparePassword = async function (password) {
+        return await bcrypt.compare(password, this.password);
+    };
     return await User.findOne({ id, password });
 }
 

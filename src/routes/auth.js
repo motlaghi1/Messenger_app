@@ -18,10 +18,17 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        const user = await userModel.findUser(id, password);
+        const user = await userModel.findUserbyId(id);
         if (!user) {
             return res.render('login', { message: "Invalid credentials!!" });
         }
+
+        //compare hashed password
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.render('login', { message: "Invalid credentials!!" });
+        }
+
         req.session.user = user;
         res.redirect('/protected_page');
     } catch (err) {
@@ -47,7 +54,7 @@ router.post('/signup', async (req, res) => {
         if (existingUser) {
             return res.render('signup', { message: "User Already Exists! Login or choose another user id" });
         }
-
+        
         const newUser = await userModel.addUser(id, password);
         req.session.user = newUser;
         res.redirect('/protected_page');
