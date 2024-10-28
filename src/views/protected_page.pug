@@ -6,22 +6,34 @@ html
         if message 
             //creates message box highlighted in red
             body.text-center 
-                .cover-container.d-flex.h-100.p-3.mx-auto.flex-column
+                .cover-container.d-flex.vh-100.p-3.mx-auto.flex-column
+                    //center content
                     .row.justify-content-center
+                        //take up 6 flexbox columns on medium screen, 8 columns on small screen
                         .col-md-6.col-sm-8
+                            //display loaded message as a red alert
                             .alert.alert-danger #{message}
-                            //secondary color button that redirects to login page
+                            //primary color button that redirects to login page
                             a.btn.btn-primary.btn-lg(href="/login") Login
         else 
             body.text-center 
                 //center content and create top margin of 5 units
-                .cover-container.d-flex.h-100.p-3.mx-auto.flex-column
+                .cover-container.d-flex.min-vh-100.p-3.mx-auto.flex-column
                     //center content
                     .row.justify-content-center
                         //take up 4 flexbox columns /12 on medium screen, 8 on small screens
                         .col-md-6.col-sm-8
+                            //main content at top of page
                             //center text and 4 unit bottom margin
                             h2.text-center.mb-4 Welcome #{id}!
                             h4.text-center.mb-4 Want to logout?
+
                             //secondary color button that redirects to login page
                             a.btn.btn-secondary.btn-lg(href="/logout") Logout
+
+                            //spacer to push delete button to bottom
+                            .flex-grow-1 
+
+                            //new container with auto top margin
+                            .mt-auto.pt-5
+                                a.btn.btn-danger.btn-lg(href="") Delete Account
