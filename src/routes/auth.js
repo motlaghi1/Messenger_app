@@ -44,7 +44,7 @@ router.get('/signup', (req, res) => {
 
 // Signup handler
 router.post('/signup', async (req, res) => {
-    const { id, password } = req.body;
+    const { id, password, name, email, UDid } = req.body;
     if (!id || !password) {
         return res.render('signup', { message: "Please enter both id and password" });
     }
@@ -55,7 +55,7 @@ router.post('/signup', async (req, res) => {
             return res.render('signup', { message: "User Already Exists! Login or choose another user id" });
         }
         
-        const newUser = await userModel.addUser(id, password);
+        const newUser = await userModel.addUser(id, password, name, email, UDid);
         req.session.user = newUser;
         res.redirect('/protected_page');
     } catch (err) {
@@ -81,7 +81,6 @@ router.get('/deleteaccount', (req, res) => {
     req.session.destroy(() => {
         console.log(`${userId} deleted.`);
     });
-    userModel.deleteUser({id: userId})
     res.redirect('/signup');
 });
 
