@@ -73,4 +73,16 @@ router.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
+// Account Deletion handler
+router.get('/deleteaccount', (req, res) => {
+    const userId = req.session.user?.id;
+    userModel.deleteUser(userId);
+    
+    req.session.destroy(() => {
+        console.log(`${userId} deleted.`);
+    });
+    userModel.deleteUser({id: userId})
+    res.redirect('/signup');
+});
+
 module.exports = router;

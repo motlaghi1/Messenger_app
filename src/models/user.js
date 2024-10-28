@@ -54,7 +54,7 @@ async function addUser(id, password) {
             email: userInfo.email || "",
             UDid: userInfo.UDid || "",
         }
-     });
+    });
     return await newUser.save();
 }
 
@@ -72,4 +72,4 @@ async function deleteUser(deletedUser) {
     .catch(error => console.error("Error deleting document:", error));
 }
 
-module.exports = { User, findUser, findUserById, addUser, getUsers };
+module.exports = { User, findUser, findUserById, addUser, getUsers, deleteUser };
