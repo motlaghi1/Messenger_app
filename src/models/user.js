@@ -50,4 +50,11 @@ async function getUsers() {
     return await User.find();
 }
 
+// Delete user
+async function deleteUser(deletedUser) {
+    User.deleteOne({ id: deletedUser.id })
+    .then(result => console.log("Document deleted:", result))
+    .catch(error => console.error("Error deleting document:", error));
+}
+
 module.exports = { User, findUser, findUserById, addUser, getUsers };
