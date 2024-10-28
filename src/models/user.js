@@ -6,7 +6,12 @@ const saltRounds = 10;
 
 const userSchema = mongoose.Schema({
     id: String,
-    password: String
+    password: String,
+    UserInfo: {
+        name: String,
+        email: String,
+        UDid: String,
+    }
 });
 
 //hashing password pre save
@@ -44,6 +49,8 @@ async function addUser(id, password) {
     const newUser = new User({ id, password });
     return await newUser.save();
 }
+
+
 
 // Get all users
 async function getUsers() {
