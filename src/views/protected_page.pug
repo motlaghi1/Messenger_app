@@ -1,9 +1,27 @@
 html 
     head 
         title Protected page 
-    body 
-        div Hey #{id}, How are you doing today?
-        div Want to log out?
-        div  
-            p 
-                a(href="/logout") Logout
+        //load bootstrap CSS framework from cdn
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css")
+        if message 
+            //creates message box highlighted in red
+            body.text-center 
+                .cover-container.d-flex.h-100.p-3.mx-auto.flex-column
+                    .row.justify-content-center
+                        .col-md-6.col-sm-8
+                            .alert.alert-danger #{message}
+                            //secondary color button that redirects to login page
+                            a.btn.btn-primary.btn-lg(href="/login") Login
+        else 
+            body.text-center 
+                //center content and create top margin of 5 units
+                .cover-container.d-flex.h-100.p-3.mx-auto.flex-column
+                    //center content
+                    .row.justify-content-center
+                        //take up 4 flexbox columns /12 on medium screen, 8 on small screens
+                        .col-md-6.col-sm-8
+                            //center text and 4 unit bottom margin
+                            h2.text-center.mb-4 Welcome #{id}!
+                            h4.text-center.mb-4 Want to logout?
+                            //secondary color button that redirects to login page
+                            a.btn.btn-secondary.btn-lg(href="/logout") Logout

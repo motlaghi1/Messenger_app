@@ -19,8 +19,7 @@ router.get('/protected_page', checkSignIn, (req, res) => {
 
 // Error handling middleware for protected page
 router.use('/protected_page', (err, req, res, next) => {
-    console.error(err.message);
-    res.redirect('/login');
+    res.render('protected_page', {message: "You cannot view this page unless you are logged in."})
 });
 
 module.exports = router;
