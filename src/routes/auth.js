@@ -19,6 +19,7 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await userModel.findUserById(id);
+        console.log(user);
         if (!user) {
             return res.render('login', { message: "Invalid credentials!!" });
         }

@@ -54,16 +54,14 @@ async function addUser(id, password, name, email, UDid) {
     return await newUser.save();
 }
 
-
-
 // Get all users
 async function getUsers() {
     return await User.find();
 }
 
 // Delete user
-async function deleteUser(deletedUser) {
-    User.deleteOne({ id: deletedUser.id })
+async function deleteUser(deletedUserId) {
+    User.deleteOne({ id: deletedUserId })
     .then(result => console.log("Document deleted:", result))
     .catch(error => console.error("Error deleting document:", error));
 }
