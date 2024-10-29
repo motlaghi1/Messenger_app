@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const app = express();
 const auth = require('./routes/auth');
 const protected = require('./routes/protected');
+const path = require('path');
 
 const db = require('./config/db');
 
@@ -24,8 +25,8 @@ app.use(multer().array());
 
 // View engine setup
 app.set('view engine', 'pug');
-app.set('views', '../src/views');
-app.use('/css', express.static('src/css'));
+app.set('views', path.join(__dirname, '../src/views'));
+app.use('/css', express.static(path.join(__dirname, '../src/css')));
 
 // Logging middleware for tracking current users
 const userModel = require('./models/user');
