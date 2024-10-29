@@ -24,8 +24,8 @@ app.use(multer().array());
 
 // View engine setup
 app.set('view engine', 'pug');
-app.set('views', './views');
-app.use('/css', express.static('src/css'));
+app.set('views', '../src/views');
+app.use('/css', express.static('../src/css'));
 
 // Logging middleware for tracking current users
 const userModel = require('./models/user');
