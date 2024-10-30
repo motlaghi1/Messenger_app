@@ -41,7 +41,10 @@ router.post('/edit_profile', checkSignIn, async (req, res) => {
             if (existingUser) {
                 // Reload the edit profile page with an error message if ID is already taken
                 return res.render('edit_profile', {
-                    message: "ID already taken. Please choose a different ID.",
+                    alert: {
+                        type: 'danger',
+                        message: 'ID already taken. Please choose a different ID.'
+                    },
                     id: currentUserId,             // Maintain current session values
                     name: req.session.user.name,
                     email: req.session.user.email,

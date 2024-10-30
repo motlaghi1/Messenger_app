@@ -20,6 +20,8 @@ html
             .container
                 .row.justify-content-center
                     .col-md-6
+                        if alert 
+                            .alert.alert-danger #{alert.message}
                         form(action="/edit_profile" method="POST")
                             .card(class='h-100').mb-4
                                 .card-body
