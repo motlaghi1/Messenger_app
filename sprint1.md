@@ -1,6 +1,12 @@
 <h1>Sprint 1</h1>
 This sprint has completed functionality for signing up, logging in, editing existing user information, and deleting accounts.
 
+---
+
+## Trello Link: 
+
+https://trello.com/invite/b/66d87bb6eca854b979ac1984/ATTI8fa67f1cf36553598cbdd034b9514c0fE350B696/cps-490-messenger-application
+
 ## Use Case Descriptions
 
 ### Use Case: Signup Information
