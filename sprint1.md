@@ -1,29 +1,39 @@
-<h1>This is Sprint 1</h1>
-<div id="AD">
-    <h2>Activity Diagrams</h2>
-    <h4>Login Activity Diagram</h4>
-    <img src="Assets/Activity_Diagram/Login Activity Diagram (1).png" alt="LAD" style="height: 300px; weight: 300px;"/>
-    <br/>
-    <h4>Send Message Activity Diagram</h4>
-    <img src="Assets/Activity_Diagram/send message activity diagram (1).png" alt="SMAD" style="height: 300px; weight: 300px;"/>
-    <br/>
-    <h4>Receive Message Activity Diagram</h4>
-    <img src="Assets/Activity_Diagram/receive message activity diagram (1).png" alt="RMAD" style="height: 300px; weight: 300px;"/>
-    <h4>Send Message to Single Receiver Activity Diagram</h4>
-    <img src="Assets/Activity_Diagram/sendSingleActivity.png" alt="SSRSD" style="height: 300px; weight: 300px;"/>
-    <h2>Sequence Diagrams</h2>
-    <h4>Send Message to Single Receiver Sequence Diagram</h4>
-    <img src="Assets/Sequence_Diagrams/sendToSingleMessage.png" alt="SSRSD" style="height: 300px; weight: 300px;"/>
-    <h4>Receive Message Sequence Diagram</h4>
-    <img src="Assets/Sequence_Diagrams/receiveMessage.png" alt="RMSD" style="height: 300px; weight: 300px;"/>	
-    <h4>Login Sequence Diagram</h4>
-    <img src="Assets/Sequence_Diagrams/loginSequence.png" alt="RMSD" style="height: 300px; weight: 300px;"/>	
-    <h4>Send Message Sequence Diagram</h4>
-    <img src="Assets/Sequence_Diagrams/sendMessageSequence.png" alt="RMSD" style="height: 300px; weight: 300px;"/>	
-    
-</div>
+<h1>Sprint 1</h1>
+This sprint has completed functionality for signing up, logging in, editing existing user information, and deleting accounts.
 
 ## Use Case Descriptions
+
+### Use Case: Signup Information
+
+#### Actor: Unregistered User
+
+#### Main Flow:
+
+1. The user is shown the login page, which displays a signup button at the bottom
+
+2. The user selects the signup page and is redirected to the signup page
+
+3. The user is shown a form asking for a ID, password, Name, Email, and UDid
+
+4. The user enters the required information.
+
+5. The system adds the information to a new entry in the database.
+
+6. The user is redirected to the protected page
+
+#### Post Conditions:
+
+- User is logged in and session is started
+
+- The user's session is maintained by the system.
+
+#### Alternate Flow:
+
+1. User tries to signup using existing ID
+   
+    a. System refreshes page displaying an error saying the username is already in use
+
+---
 
 ### Use Case: User Login
 
@@ -44,9 +54,9 @@ This use case describes the process of a user logging into the messenger applica
 
 1.  The user navigates to the login page.
 
-2.  The system displays a username field for the login form.
+2.  The system displays a username and password field for the login form.
 
-3.  The user enters a username in the username field.
+3.  The user enters a username in the username field, a password in the password field.
 
 4.  The user clicks the "Login" button.
 
@@ -54,18 +64,15 @@ This use case describes the process of a user logging into the messenger applica
 
 6.  The system logs the user in.
 
-7.  The system retrieves the user's message information.
+7.  The system redirects the user to the protected page.
 
-7.  The system redirects the user to their message dashboard.
+7.  The protected page shows options to Logout, Edit User Info, and Delete Account
 
 #### Alternative Flows:
 
-4a. The inputted username is not registered in the system.
+1. The inputted username is not registered in the system.
 
-1.  The system creates a new database entry for the inputted username.
-
-2.  The use case resumes at step 6.
-
+2. The system denies entry, shows a message saying the username is not valid, and shows a button to go back to the login page
 
 #### Postconditions:
 
@@ -73,183 +80,58 @@ This use case describes the process of a user logging into the messenger applica
 
 -   The user's session is created and maintained by the system.
 
--   The user's inputted username, if newly created, is logged by the
-    system along with any following messages.
+
 
 ---
 
-### Use Case: Receive Message
+### Use Case: Edit Information
 
 #### Actor: Registered User
 
 #### Description:
-This use case describes the process of a user receiving and viewing a message in the messenger application.
+This use case describes the process of a user editing their existing user information
 
 #### Preconditions:
 
 -   The user is currently logged in.
 
--   The messaging feature is available.
-
--   The user is currently in a text channel or direct message.
-
--   Another registered user sent a message to the actor user. 
 
 #### Main Flow:
 
-1.  The system pulls the updated version of the current text channel or direct message.
+1.  The user selects the Edit User Information button
 
-2.  The system compares the user's current chat session and the pulled session for any new messages.
+2.  The system shows a form with each field for their ID, Name, Email, and UDid
 
-3.  The system displays any new messages in the user's message stream with a bold format.
+3.  The user enters updated information
 
-4.  After 5 seconds, the bold format is cleared on the user's message stream.
+4.  The system updates the database and redirects the user to the login page.
 
-#### Postconditions:
+#### Alternate Flow:
 
--   The received message is saved in the current text channel or direct message stream.
+1.    The user is not logged in
+
+      a. The system displays an error and redirects to login
+
+2.  The user tries to update to an existing username
+
+     a.  The system refreshes the edit page with an error saying the username is invalid
 
 ---
 
-### Use Case: Send Message to Single Receiver
+
+### Use Case: Delete Information:
 
 #### Actor: Registered User
 
-#### Description: 
-This use case describes the process of a user sending a message directly to a single recipient in the messenger application.
-
-#### Preconditions:
-
--   The user is logged in.
-
--   The user's dashboard contains accessible direct message recipients
-
--   The user has network connectivity
-
--   The messaging feature is available
-
--   The message recipient is a registered user.
-
 #### Main Flow:
 
-1.  The user selects a user to direct message from their main dashboard.
+1. User is on protected page after signing in
 
-2.  The system displays a stream view of message history in the selected
-    text channel, along with an input field at the bottom of the screen.
+2. User selects button that says "Delete Account"
 
-3.  The user clicks on the message input field.
+3. The system deletes the User from the database
 
-4.  The user composes a message and clicks on the "Send" button.
+4. The system destroys the session
 
-5.  The system validates the message.
+5. The system redirects the user to the signup page
 
-6.  The system clears the input field.
-
-7.  The system pushes the user's message to the database.
-
-8.  The system displays the sent message in the current message stream.
-
-#### Alternative Flows:
-
-1a. The user does not have any previously saved direct messages.
-
-1. The user clicks on the "Plus" button in the top right corner of the screen.
-
-2. The system directs the user to a "New Message" screen with an input field for a recipient at the top, and an input field for the message at the bottom.
-
-3. The user enters their desired recipient's username in the recipient input field.
-
-4. The use case continues from step 3.
-
-
-4a. The user sends too many messages in a short span of time.
-
-1.  The user composes a message and clicks on the "Send" button.
-
-2.  The system detects possible spam messaging.
-
-3.  The system displays a message to the user reading "Slow down! You're
-    sending messages too quickly."
-
-4.  The system does not send the message to the text channel.
-
-5.  The system clears the input field.
-
-6.  If the user waits 10 seconds, go back to step 4 and continue as
-    normal.
-
-#### Postconditions:
-
--   The user's inputted message is successfully sent to the specified recipient.
-
--   The message is displayed in the message stream.
-
----
-
-## Use Case: Send Message
-
-#### Actor: Registered User
-
-#### Description: 
-This use case describes the process of a user sending a message to a text channel in the messenger application.
-
-#### Preconditions:
-
--   The user is logged in.
-
--   The user's dashboard contains accessible text channels
-
--   The user has network connectivity
-
--   The messaging feature is available
-
-#### Main Flow:
-
-1.  The user selects a text channel from their main dashboard.
-
-2.  The system displays a stream view of all messages in the selected text channel, along with an input field at the bottom of the screen.
-
-3.  The user clicks on the input area.
-
-4.  The user composes a message and clicks on the "Send" button.
-
-5.  The system validates the message.
-
-6.  The system clears the input area.
-
-7.  The system pushes the sent message to the respective table in the message database.
-
-#### Alternative Flows:
-
-4a. The user sends too many messages in a short span of time.
-
-1.  The user composes a message and clicks on the "Send" button.
-
-2.  The system detects possible spam messaging.
-
-3.  The system displays a message to the user reading "Slow down! You're sending messages too quickly."
-
-4.  The system does not send the message to the text channel.
-
-5.  The system clears the input area.
-
-6.  If the user waits 10 seconds, go back to step 4 and continue as normal.
-
-#### Postconditions:
-
--   The user's inputted message is successfully sent to the specified text channel.
-
--   The message is displayed in the channel's message stream.
-
----
-
-## Trello Screenshots
-
-#### Beginning:
-![](/Assets/Trello_Screenshots/Sprint_1_beginning.JPG)
-
-#### Middle:
-![](/Assets/Trello_Screenshots/Sprint_1_middle.png)
-
-#### End:
-![](/Assets/Trello_Screenshots/Sprint_1_end.png)
