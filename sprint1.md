@@ -141,3 +141,6 @@ This use case describes the process of a user editing their existing user inform
 
 5. The system redirects the user to the signup page
 
+---
+
+*All Bootstrap styling code sourced from https://getbootstrap.com/docs/5.3/getting-started/introduction/*
