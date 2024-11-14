@@ -13,9 +13,29 @@ const checkSignIn = (req, res, next) => {
     }
 };
 
+// Middleware to check if the user is an admin
+const checkAdmin = (req, res, next) => {
+    if (req.session.user && req.session.user.Admin === true) {
+        return next();
+    } else {
+        const err = new Error("You do not have permission to access this page.");
+        err.status = 403; // Forbidden
+        return next(err);
+    }
+};
+
+// Admin page route, only accessible by admin users
+router.get('/admin', checkSignIn, checkAdmin, (req, res) => {
+    res.render('admin', { id: req.session.user.id });
+});
+
 // Protected page route
 router.get('/protected_page', checkSignIn, (req, res) => {
-    res.render('protected_page', { id: req.session.user.id });
+    if (req.session.user && req.session.user.Admin === true) {
+        res.redirect('/admin');
+    } else {
+        res.render('protected_page', { id: req.session.user.id });
+    }
 });
 
 // Edit page route
@@ -70,7 +90,6 @@ router.post('/edit_profile', checkSignIn, async (req, res) => {
     }
 });
 
-
 // Error handling middleware for protected page
 router.use('/protected_page', (err, req, res, next) => {
     res.render('protected_page', { message: "You cannot view this page unless you are logged in." });
@@ -79,6 +98,15 @@ router.use('/protected_page', (err, req, res, next) => {
 // Error handling middleware for edit profile page
 router.use('/edit_profile', (err, req, res, next) => {
     res.render('edit_profile', { message: "You cannot view this page unless you are logged in." });
+});
+
+// Error handling middleware for admin page
+router.use('/admin', (err, req, res, next) => {
+    if (err.status === 403) {
+        res.render('admin', { message: "You cannot view this page unless you are an admin!!!!"});
+    } else {
+        next(err);
+    }
 });
 
 module.exports = router;

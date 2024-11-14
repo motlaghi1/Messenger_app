@@ -24,11 +24,13 @@ router.post('/login', async (req, res) => {
             return res.render('login', { message: "Invalid credentials!!" });
         }
 
-        //compare hashed password
+        // Compare hashed password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.render('login', { message: "Invalid credentials!" });
         }
+
+        
 
         req.session.user = user;
         res.redirect('/protected_page');
