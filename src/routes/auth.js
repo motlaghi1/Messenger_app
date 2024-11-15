@@ -29,7 +29,12 @@ router.post('/login', async (req, res) => {
         if (!isMatch) {
             return res.render('login', { message: "Invalid credentials!" });
         }
-
+        
+        // If user is disabled, prevent login
+        const isDisabled = user.Disabled;
+        if(isDisabled){
+            return res.render('login', {message: "Login Disabled!"});
+        };
         
 
         req.session.user = user;

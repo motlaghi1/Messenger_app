@@ -1,17 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { updateUser, findUserById } = require('../models/user.js'); 
+const { updateUser, findUserById, getUsers } = require('../models/user.js'); 
+const mongoose = require('mongoose');
 
-// Middleware to check if the user is signed in
-const checkSignIn = (req, res, next) => {
-    if (req.session.user) {
-        return next();
-    } else {
-        const err = new Error("Not logged in!");
-        err.status = 400;
-        return next(err);
-    }
-};
 
 // Middleware to check if the user is an admin
 const checkAdmin = (req, res, next) => {
@@ -24,9 +15,26 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
+// Middleware to check if the user is signed in
+const checkSignIn = (req, res, next) => {
+    if (req.session.user) {
+        return next();
+    } else {
+        const err = new Error("Not logged in!");
+        err.status = 400;
+        return next(err);
+    }
+};
+
 // Admin page route, only accessible by admin users
-router.get('/admin', checkSignIn, checkAdmin, (req, res) => {
-    res.render('admin', { id: req.session.user.id });
+router.get('/admin', checkSignIn, checkAdmin, async (req, res) => {
+    try {
+        const users = await getUsers(); // Make sure getUsers() returns an array of user objects
+        res.render('admin', { users: users, message: null });
+    } catch (err) {
+        console.error("Error fetching users:", err);
+        res.render('admin', { users: [], message: "Error loading users." });
+    }
 });
 
 // Protected page route
@@ -90,6 +98,55 @@ router.post('/edit_profile', checkSignIn, async (req, res) => {
     }
 });
 
+router.post('/admin', checkSignIn, checkAdmin, async (req, res) => {
+    console.log("Reached the /admin route");
+    try {
+        // Fetch all users from the database
+        const users = await getUsers();
+
+        // Render the admin page with the list of users
+        res.render('admin', { users: users, message: '' });
+    } catch (err) {
+        console.error("Error fetching users:", err);
+        res.render('admin', { message: "Error fetching user list." });
+    }
+});
+
+router.post('/admin/toggle', checkSignIn, checkAdmin, async (req, res) => {
+    console.log("Reached the /admin/toggle route");
+    try {
+        const { userId } = req.body;
+        console.log("User ID: ", userId);
+        // Find the user by ID
+        const user = await findUserById(userId);
+
+        // Check if the user exists
+        if (!user) {
+            return res.render('admin', { message: "User not found." });
+        }
+
+        console.log("User found:", user);
+
+        // Toggle the Disabled status
+        user.Disabled = !user.Disabled;
+
+        console.log("After toggling:", user);
+
+        // Save the updated user
+        await user.save();
+
+        // Fetch the updated users list
+        const users = await getUsers();
+
+        // Render the admin page with the updated list of users
+        res.render('admin', { users: users, message: 'User status updated successfully!' });
+    } catch (err) {
+        console.error("Error while updating user status:", err);
+        res.render('admin', { message: "Error updating user status." });
+    }
+});
+
+
 // Error handling middleware for protected page
 router.use('/protected_page', (err, req, res, next) => {
     res.render('protected_page', { message: "You cannot view this page unless you are logged in." });
@@ -103,7 +160,7 @@ router.use('/edit_profile', (err, req, res, next) => {
 // Error handling middleware for admin page
 router.use('/admin', (err, req, res, next) => {
     if (err.status === 403) {
-        res.render('admin', { message: "You cannot view this page unless you are an admin!!!!"});
+        res.render('login', { message: "You cannot view this page unless you are an admin!!!!"});
     } else {
         next(err);
     }
