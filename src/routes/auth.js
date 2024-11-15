@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
         }
 
         req.session.user = user;
-        res.redirect('/protected_page');
+        res.redirect('/chat');
     } catch (err) {
         console.error("Login error: ", err);
         res.render('login', { message: "An error occurred, please try again." });
