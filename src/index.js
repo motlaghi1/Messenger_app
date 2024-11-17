@@ -8,8 +8,11 @@ const app = express();
 const auth = require('./routes/auth');
 const protected = require('./routes/protected');
 const path = require('path');
-
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io')(server);
 const db = require('./config/db');
+
 
 // Middleware setup
 app.use(cookieParser());
@@ -27,6 +30,8 @@ app.use(multer().array());
 app.set('view engine', 'pug'); 
 app.set('views', path.join(__dirname, '../src/views'));
 app.use('/css', express.static(path.join(__dirname, '../src/css')));
+app.use('/js', express.static(path.join(__dirname)));
+
 
 // Logging middleware for tracking current users
 
@@ -54,6 +59,10 @@ app.use('/', protected);
 
 // Server setup
 const port = process.env.PORT || 8080;
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
+
+io.on('connection', (socket) => {
+    console.log(socket.id)
+})
