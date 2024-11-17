@@ -24,11 +24,18 @@ router.post('/login', async (req, res) => {
             return res.render('login', { message: "Invalid credentials!!" });
         }
 
-        //compare hashed password
+        // Compare hashed password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.render('login', { message: "Invalid credentials!" });
         }
+        
+        // If user is disabled, prevent login
+        const isDisabled = user.Disabled;
+        if(isDisabled){
+            return res.render('login', {message: "Login Disabled!"});
+        };
+        
 
         req.session.user = user;
         res.redirect('/chat');

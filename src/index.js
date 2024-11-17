@@ -24,11 +24,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer().array());
 
 // View engine setup
-app.set('view engine', 'pug');
+app.set('view engine', 'pug'); 
 app.set('views', path.join(__dirname, '../src/views'));
 app.use('/css', express.static(path.join(__dirname, '../src/css')));
 
 // Logging middleware for tracking current users
+
 const userModel = require('./models/user');
 app.use('/', async (req, res, next) => {
     try {
