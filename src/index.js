@@ -29,8 +29,8 @@ app.use(multer().array());
 
 // View engine setup
 app.set('view engine', 'pug'); 
-app.set('views', path.join(__dirname, '../src/views'));
-app.use('/css', express.static(path.join(__dirname, '../src/css')));
+app.set('views', path.join(__dirname, '../src/public/views'));
+app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
 app.use('/js', express.static(path.join(__dirname)));
 
 
