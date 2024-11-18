@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema({
     name: String,
     email: String,
     UDid: String,
+    socketID: {type: String},
 });
 
 // Hashing password pre-save

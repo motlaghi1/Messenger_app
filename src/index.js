@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const app = express();
 const auth = require('./routes/auth');
 const protected = require('./routes/protected');
+const directMessages = require('./routes/directMessages');
 const path = require('path');
 
 const db = require('./config/db');
@@ -50,6 +51,7 @@ app.use('/', async (req, res, next) => {
 // Routes
 app.use('/', auth);
 app.use('/', protected);
+app.use('/', directMessages);
 
 // Server setup
 const port = process.env.PORT || 8080;
