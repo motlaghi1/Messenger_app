@@ -8,7 +8,7 @@ html(lang="en")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
         script(src="/socket.io/socket.io.js")
         script(src="/js/socket-client.js")
-        script(src="/js/chat-page.js")
+        script(src="/js/page.js")
         
         style.
             :root {
@@ -187,148 +187,148 @@ html(lang="en")
                                 | Refresh
 
                     //- Chat Messages Area
-                    .chat-messages.p-3.bg-light
-                        #globalChat.chat-type.active
+                    .chat-messages.p-3.bg-light88uu
+                        ul#chatBox-glob
+                            li Tester
+                        ul#chatBox-group
+                            li Tester
+                        ul#chatBox-dm
+                            li Tester
+                        ul#globalChat.chat-type.active
                             //- Sample messages (replace with dynamic data)
-                            .message.received.bg-white.shadow-sm.p-3.mb-3
-                                .fw-semibold John Doe
-                                div Hello everyone!
-                                .text-muted.small.mt-1 10:30 AM
-                            .message.sent.bg-primary.text-white.p-3.mb-3
-                                div Hi John! Welcome to the chat.
-                                .text-white-50.small.mt-1 10:31 AM
-                        #groupChat.chat-type.d-none
-                        #dmChat.chat-type.d-none
+                            //- .message.received.bg-white.shadow-sm.p-3.mb-3
+                            //-     .fw-semibold John Doe
+                            //-     div Hello everyone!
+                            //-     .text-muted.small.mt-1 10:30 AM
+                            //- .message.sent.bg-primary.text-white.p-3.mb-3
+                            //-     div Hi John! Welcome to the chat.
+                            //-     .text-white-50.small.mt-1 10:31 AM
+                        ul#groupChat.chat-type.d-none
+                        ul#dmChat.chat-type.d-none
 
                     //- Chat Input Area
                     .border-top.p-3.bg-white
                         .input-group
                             input.form-control#messageInput(type="text" placeholder="Type a message...")
-                            button.btn.btn-primary#sendButton(type="submit" style="background-color: #6D54B8; border-color: #6D54B8;")
+                            button.btn.btn-primary#sendButton(type="button" style="background-color: #6D54B8; border-color: #6D54B8;")
                                 i.fas.fa-paper-plane.me-1
                                 | Send
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js")
         //- script.
-            //- // State Management
-            //- let currentChatType = 'global';
-            //- let currentChatId = null;
+        //-     // State Management
+        //-     let currentChatType = 'global';
+        //-     let currentChatId = null;
 
-            //- // DOM Elements
-            //- const navButtons = document.querySelectorAll('[data-chat-type]');
-            //- const dmContacts = document.getElementById('dmContacts');
-            //- const groupContacts = document.getElementById('groupContacts');
-            //- const chatTypes = document.querySelectorAll('.chat-type');
-            //- const currentChatTitle = document.getElementById('currentChat');
-            //- const messageInput = document.getElementById('messageInput');
-            //- const sendButton = document.getElementById('sendButton');
+        //-     // DOM Elements
+        //-     const navButtons = document.querySelectorAll('[data-chat-type]');
+        //-     const dmContacts = document.getElementById('dmContacts');
+        //-     const groupContacts = document.getElementById('groupContacts');
+        //-     const chatTypes = document.querySelectorAll('.chat-type');
+        //-     const currentChatTitle = document.getElementById('currentChat');
+        //-     const messageInput = document.getElementById('messageInput');
+        //-     const sendButton = document.getElementById('sendButton');
 
-            //- // Search Functionality
-            //- function setupSearch(searchId, listId) {
-            //-     const searchInput = document.getElementById(searchId);
-            //-     const list = document.getElementById(listId);
+        //-     // Search Functionality
+        //-     function setupSearch(searchId, listId) {
+        //-         const searchInput = document.getElementById(searchId);
+        //-         const list = document.getElementById(listId);
                 
-            //-     searchInput.addEventListener('input', function() {
-            //-         const searchTerm = this.value.toLowerCase();
-            //-         const items = list.getElementsByClassName('contact-item');
+        //-         searchInput.addEventListener('input', function() {
+        //-             const searchTerm = this.value.toLowerCase();
+        //-             const items = list.getElementsByClassName('contact-item');
                     
-            //-         Array.from(items).forEach(item => {
-            //-             const text = item.textContent.toLowerCase();
-            //-             item.style.display = text.includes(searchTerm) ? '' : 'none';
-            //-         });
-            //-     });
-            //- }
+        //-             Array.from(items).forEach(item => {
+        //-                 const text = item.textContent.toLowerCase();
+        //-                 item.style.display = text.includes(searchTerm) ? '' : 'none';
+        //-             });
+        //-         });
+        //-     }
 
-            //- // Initialize search
-            //- setupSearch('dmSearch', 'dmList');
-            //- setupSearch('groupSearch', 'groupList');
+        //-     // Initialize search
+        //-     setupSearch('dmSearch', 'dmList');
+        //-     setupSearch('groupSearch', 'groupList');
 
-            //- // Chat Switching Function
-            //- function switchChat(chatType) {
-            //-     // Reset navigation buttons
-            //-     navButtons.forEach(btn => {
-            //-         btn.classList.remove('active');
-            //-     });
+        //-     // Chat Switching Function
+        //-     function switchChat(chatType) {
+        //-         // Reset navigation buttons
+        //-         navButtons.forEach(btn => {
+        //-             btn.classList.remove('active');
+        //-         });
                 
-            //-     // Activate clicked button
-            //-     const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
-            //-     if (activeButton) {
-            //-         activeButton.classList.add('active');
-            //-     }
+        //-         // Activate clicked button
+        //-         const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
+        //-         if (activeButton) {
+        //-             activeButton.classList.add('active');
+        //-         }
 
-            //-     // Show/hide contacts
-            //-     dmContacts.classList.toggle('d-none', chatType !== 'dms');
-            //-     groupContacts.classList.toggle('d-none', chatType !== 'groups');
+        //-         // Show/hide contacts
+        //-         dmContacts.classList.toggle('d-none', chatType !== 'dms');
+        //-         groupContacts.classList.toggle('d-none', chatType !== 'groups');
 
-            //-     // Show appropriate chat
-            //-     chatTypes.forEach(chat => {
-            //-         chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
-            //-     });
+        //-         // Show appropriate chat
+        //-         chatTypes.forEach(chat => {
+        //-             chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
+        //-         });
 
-            //-     // Update title
-            //-     currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-            //-                                 chatType === 'groups' ? 'Select a Group' : 
-            //-                                 'Select a Conversation';
+        //-         // Update title
+        //-         currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
+        //-                                     chatType === 'groups' ? 'Select a Group' : 
+        //-                                     'Select a Conversation';
 
-            //-     // Update state
-            //-     currentChatType = chatType;
-            //-     currentChatId = chatType === 'global' ? 'global' : null;
+        //-         // Update state
+        //-         currentChatType = chatType;
+        //-         currentChatId = chatType === 'global' ? 'global' : null;
 
-            //-     // Load messages
-            //-     loadMessages(chatType);
-            //- }
+        //-         // Load messages
+        //-         loadMessages(chatType);
+        //-     }
 
-            //- // Navigation handlers
-            //- navButtons.forEach(button => {
-            //-     button.addEventListener('click', () => {
-            //-         const chatType = button.dataset.chatType;
-            //-         switchChat(chatType);
-            //-     });
-            //- });
+        //-     // Navigation handlers
+        //-     navButtons.forEach(button => {
+        //-         button.addEventListener('click', () => {
+        //-             const chatType = button.dataset.chatType;
+        //-             switchChat(chatType);
+        //-         });
+        //-     });
 
-            //- // Contact item handlers
-            //- document.querySelectorAll('.contact-item').forEach(item => {
-            //-     item.addEventListener('click', function() {
-            //-         document.querySelectorAll('.contact-item').forEach(i => 
-            //-             i.classList.remove('active'));
-            //-         this.classList.add('active');
-            //-     });
-            //- });
+        //-     // Contact item handlers
+        //-     document.querySelectorAll('.contact-item').forEach(item => {
+        //-         item.addEventListener('click', function() {
+        //-             document.querySelectorAll('.contact-item').forEach(i => 
+        //-                 i.classList.remove('active'));
+        //-             this.classList.add('active');
+        //-         });
+        //-     });
 
-            //- // Message sending handler
-            //- //- sendButton.addEventListener('click', () => {
-            //- //-     const message = messageInput.value.trim();
-            //- //-     if (message && currentChatId) {
-            //- //-         sendMessage(message);
-            //- //-         messageInput.value = '';
-            //- //-     }
-            //- //- });
+        //-     // Message sending handler
+        //-     //- sendButton.addEventListener('click', () => {
+        //-     //-     const message = messageInput.value.trim();
+        //-     //-     if (message && currentChatId) {
+        //-     //-         sendMessage(message);
+        //-     //-         messageInput.value = '';
+        //-     //-     }
+        //-     //- });
 
-            //- // Enter key handler
-            //- messageInput.addEventListener('keypress', (e) => {
-            //-     if (e.key === 'Enter' && !e.shiftKey) {
-            //-         e.preventDefault();
-            //-         sendButton.click();
-            //-     }
-            //- });
+        //-     // Enter key handler
+        //-     messageInput.addEventListener('keypress', (e) => {
+        //-         if (e.key === 'Enter' && !e.shiftKey) {
+        //-             e.preventDefault();
+        //-             sendButton.click();
+        //-         }
+        //-     });
 
-            //- // Message loading function
-            //- function loadMessages(chatType, chatId = null) {
-            //-     const chatContainer = document.getElementById(`${chatType}Chat`);
-            //-     // Here you would typically fetch messages from your server
-            //-     chatContainer.innerHTML = `
-            //-         <div class="text-center text-muted py-5">
-            //-             <i class="fas fa-comments fa-2x mb-3"></i>
-            //-             <p>Loading ${chatType} messages...</p>
-            //-         </div>
-            //-     `;
-            //- }
+        //-     // Message loading function
+        //-     function loadMessages(chatType, chatId = null) {
+        //-         const chatContainer = document.getElementById(`${chatType}Chat`);
+        //-         // Here you would typically fetch messages from your server
+        //-     }
 
-            //- // Message sending function
-            //- function sendMessage(message) {
-            //-     console.log(`Sending message to ${currentChatType}:`, message);
-            //-     // Here you would typically send the message to your server
-            //- }
+        //-     // Message sending function
+        //-     function sendMessage(message) {
+        //-         console.log(`Sending message to ${currentChatType}:`, message);
+        //-         // Here you would typically send the message to your server
+        //-     }
 
-            //- // Initialize with global chat
-            //- switchChat('global');
+        //-     // Initialize with global chat
+        //-     switchChat('global');
