@@ -13,6 +13,7 @@ const server = http.createServer(app);
 const io = require('socket.io')(server);
 const db = require('./config/db');
 
+const socketHandler = require('./socket-server');
 
 // Middleware setup
 app.use(cookieParser());
@@ -57,12 +58,11 @@ app.use('/', async (req, res, next) => {
 app.use('/', auth);
 app.use('/', protected);
 
+// Attach socket.io logic
+socketHandler(io);
+
 // Server setup
 const port = process.env.PORT || 8080;
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
-
-io.on('connection', (socket) => {
-    console.log(socket.id)
-})

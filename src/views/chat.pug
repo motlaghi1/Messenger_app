@@ -6,6 +6,8 @@ html(lang="en")
         title Chat Application
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+        script(src="/socket.io/socket.io.js")
+        script(src="/js/socket-client.js")
         
         style.
             :root {
@@ -264,8 +266,8 @@ html(lang="en")
 
                 // Update title
                 currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-                                             chatType === 'groups' ? 'Select a Group' : 
-                                             'Select a Conversation';
+                                            chatType === 'groups' ? 'Select a Group' : 
+                                            'Select a Conversation';
 
                 // Update state
                 currentChatType = chatType;
@@ -293,13 +295,13 @@ html(lang="en")
             });
 
             // Message sending handler
-            sendButton.addEventListener('click', () => {
-                const message = messageInput.value.trim();
-                if (message && currentChatId) {
-                    sendMessage(message);
-                    messageInput.value = '';
-                }
-            });
+            //- sendButton.addEventListener('click', () => {
+            //-     const message = messageInput.value.trim();
+            //-     if (message && currentChatId) {
+            //-         sendMessage(message);
+            //-         messageInput.value = '';
+            //-     }
+            //- });
 
             // Enter key handler
             messageInput.addEventListener('keypress', (e) => {
