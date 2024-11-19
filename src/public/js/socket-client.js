@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
     const sendButton = document.getElementById('sendButton');
     const inputField = document.getElementById('messageInput');
+    const createGroupButton = document.getElementById('createGroup');
     
     function sendMessage(message, roomId) {
         displayMessage(message, 'from-me');
@@ -24,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    createGroupButton.addEventListener('click', function() {
+        console.log("Created group")
+    });
+
     sendButton.addEventListener('click', function() {
         const message = inputField.value;
 

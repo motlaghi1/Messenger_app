@@ -156,7 +156,10 @@ html(lang="en")
                 .col-auto.bg-white.border-end.vh-100.d-none#groupContacts(style="width: 280px;")
                     .d-flex.flex-column.h-100
                         .p-3.border-bottom
-                            h5.mb-3 Group Chats
+                            .d-flex.justify-content-between.align-items-center
+                                h5.mb-3 Group Chats
+                                button.btn.btn-sm.btn-primary#createGroup
+                                    i.fas.fa-plus
                             .position-relative
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#groupSearch(type="text" placeholder="Search groups...")

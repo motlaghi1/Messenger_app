@@ -105,12 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadMessages(chatType, chatId = null) {
         const chatContainer = document.getElementById(`${chatType}Chat`);
         // Here you would typically fetch messages from your server
-        chatContainer.innerHTML = `
-            <div class="text-center text-muted py-5">
-                <i class="fas fa-comments fa-2x mb-3"></i>
-                <p>Loading ${chatType} messages...</p>
-            </div>
-        `;
     }
 
     // Message sending function
