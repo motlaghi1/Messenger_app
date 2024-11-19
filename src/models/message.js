@@ -12,10 +12,15 @@ const Message = mongoose.model('Message', messageSchema);
 
 //send a message
 async function sendMessage(senderID, recipientID, content) {
-    const message = new Message({ senderID, recipientID, content });
-    await message.save();
-    return message; // Returns the saved message
+    try {
+        const message = new Message({ senderID, recipientID, content });
+        await message.save();
+        return message;
+    } catch (error) {
+        throw new Error(`Error sending message: ${error.message}`);
+    }
 }
+
 
 //retrieve message history between two users
 async function getMessageHistory(user1, user2, limit = 50) {
@@ -33,14 +38,12 @@ async function getMessageHistory(user1, user2, limit = 50) {
 
         //get messages sorted by newest first
         const messages = await Message.find(query)
-            .sort({timestamp:-1}) //always show newest first
-            .limit(limit) //only shows 50 at a time
-            .lean(); //converts MongoDB object to plain JS object for better query performance
-
-        return {
-            messages: messages.reverse(), //reverse to show in chronological order
-            totalMessages
-        };
+        .sort({ timestamp: 1 }) // Sorted in chronological order directly
+        .limit(limit)
+        .lean();
+        
+        return { messages, totalMessages };
+        
     } catch (error) {
         throw new Error(`Error fetching message history: ${error.message}`);
     }
@@ -51,4 +54,9 @@ async function markAsDelivered(messageID) {
     return Message.updateOne({ _id: messageID }, { $set: { delivered: true } });
 }
 
-module.exports = Message;
+module.exports = {
+    Message,
+    sendMessage,
+    getMessageHistory,
+    markAsDelivered,
+};
