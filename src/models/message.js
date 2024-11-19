@@ -1,14 +1,29 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const messageSchema = mongoose.Schema({
-    senderID: { type: String, required: true }, // ID of the sender
-    recipientID: { type: String, required: true }, // ID of the recipient
-    content: { type: String, required: true }, // Message content
-    timestamp: { type: Date, default: Date.now }, // Time the message was sent
-    delivered: { type: Boolean, default: false } // Delivery status 
+const messageSchema = new mongoose.Schema({
+    content: {
+        type: String,
+        required: true
+    },
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Channel',
+        required: true
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now  
+    },
 });
 
-const Message = mongoose.model('Message', messageSchema);
+const Message = mongoose.model("message", messageSchema);
+
+module.exports = { Message };
 
 //send a message
 async function sendMessage(senderID, recipientID, content) {
