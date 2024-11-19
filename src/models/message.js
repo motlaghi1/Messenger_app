@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Channel } = require("./channel");
 
 const messageSchema = new mongoose.Schema({
     content: {
@@ -26,10 +27,20 @@ const Message = mongoose.model("message", messageSchema);
 module.exports = { Message };
 
 //send a message
-async function sendMessage(senderID, recipientID, content) {
+async function sendMessage(senderID, channelID, content) {
     try {
-        const message = new Message({ senderID, recipientID, content });
+        //create a new message
+        const message = new Message({ sender: senderID, channel: channelID, content });
+        
+        //save message to DB
         await message.save();
+
+        //add message ID to channel's messages array
+        await Channel.updateOne(
+            {id: channelID},
+            {$push: {messages: message._id}, updatedAt: Date.now()}
+        );
+
         return message;
     } catch (error) {
         throw new Error(`Error sending message: ${error.message}`);
@@ -38,26 +49,20 @@ async function sendMessage(senderID, recipientID, content) {
 
 
 //retrieve message history between two users
-async function getMessageHistory(user1, user2, limit = 50) {
+async function getMessageHistory(channelID, limit = 50) {
     try {
-        //query to match messages between two users sent in either direction
-        const query = {
-            $or: [
-                {senderID: user1, recipientID: user2},
-                {senderID: user2, recipientID: user1}
-            ]
-        };
 
         //get total message count
-        const totalMessages = await Message.countDocuments(query);
+        const totalMessages = await Message.countDocuments({channel: channelID});
 
         //get messages sorted by newest first
-        const messages = await Message.find(query)
-        .sort({ timestamp: 1 }) // Sorted in chronological order directly
+        const messages = await Message.find({channel: channelID})
+        .sort({ timestamp: -1 }) //newest messages first
         .limit(limit)
-        .lean();
+        .populate('sender', 'username') //populate sender details
+        .lean(); //change DB object to JS object for easier frontend manipulation
         
-        return { messages, totalMessages };
+        return { messages: messages.reverse(), totalMessages }; 
         
     } catch (error) {
         throw new Error(`Error fetching message history: ${error.message}`);
