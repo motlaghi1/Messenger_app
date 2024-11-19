@@ -13,6 +13,16 @@ const checkSignIn = (req, res, next) => {
     }
 };
 
+
+router.get('/chat', checkSignIn, (req, res) => {
+    res.render('chat', { 
+        user: req.session.user,
+        currentPage: 'chat' });
+});
+
+//API route for chat
+
+
 // Protected page route
 router.get('/protected_page', checkSignIn, (req, res) => {
     res.render('protected_page', { id: req.session.user.id });
