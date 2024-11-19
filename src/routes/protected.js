@@ -1,6 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { updateUser, findUserById } = require('../models/user.js'); 
+const { updateUser, findUserById, getUsers } = require('../models/user.js'); 
+const mongoose = require('mongoose');
+
+
+// Middleware to check if the user is an admin
+const checkAdmin = (req, res, next) => {
+    if (req.session.user && req.session.user.Admin === true) {
+        return next();
+    } else {
+        const err = new Error("You do not have permission to access this page.");
+        err.status = 403; // Forbidden
+        return next(err);
+    }
+};
 
 // Middleware to check if the user is signed in
 const checkSignIn = (req, res, next) => {
@@ -12,6 +25,17 @@ const checkSignIn = (req, res, next) => {
         return next(err);
     }
 };
+
+// Admin page route, only accessible by admin users
+router.get('/admin', checkSignIn, checkAdmin, async (req, res) => {
+    try {
+        const users = await getUsers(); // Make sure getUsers() returns an array of user objects
+        res.render('admin', { users: users, message: null });
+    } catch (err) {
+        console.error("Error fetching users:", err);
+        res.render('admin', { users: [], message: "Error loading users." });
+    }
+});
 
 
 router.get('/chat', checkSignIn, (req, res) => {
@@ -25,7 +49,11 @@ router.get('/chat', checkSignIn, (req, res) => {
 
 // Protected page route
 router.get('/protected_page', checkSignIn, (req, res) => {
-    res.render('protected_page', { id: req.session.user.id });
+    if (req.session.user && req.session.user.Admin === true) {
+        res.redirect('/admin');
+    } else {
+        res.render('protected_page', { id: req.session.user.id });
+    }
 });
 
 // Edit page route
@@ -80,6 +108,54 @@ router.post('/edit_profile', checkSignIn, async (req, res) => {
     }
 });
 
+router.post('/admin', checkSignIn, checkAdmin, async (req, res) => {
+    console.log("Reached the /admin route");
+    try {
+        // Fetch all users from the database
+        const users = await getUsers();
+
+        // Render the admin page with the list of users
+        res.render('admin', { users: users, message: '' });
+    } catch (err) {
+        console.error("Error fetching users:", err);
+        res.render('admin', { message: "Error fetching user list." });
+    }
+});
+
+router.post('/admin/toggle', checkSignIn, checkAdmin, async (req, res) => {
+    console.log("Reached the /admin/toggle route");
+    try {
+        const { userId } = req.body;
+        console.log("User ID: ", userId);
+        // Find the user by ID
+        const user = await findUserById(userId);
+
+        // Check if the user exists
+        if (!user) {
+            return res.render('admin', { message: "User not found." });
+        }
+
+        console.log("User found:", user);
+
+        // Toggle the Disabled status
+        user.Disabled = !user.Disabled;
+
+        console.log("After toggling:", user);
+
+        // Save the updated user
+        await user.save();
+
+        // Fetch the updated users list
+        const users = await getUsers();
+
+        // Render the admin page with the updated list of users
+        res.render('admin', { users: users, message: 'User status updated successfully!' });
+    } catch (err) {
+        console.error("Error while updating user status:", err);
+        res.render('admin', { message: "Error updating user status." });
+    }
+});
+
 
 // Error handling middleware for protected page
 router.use('/protected_page', (err, req, res, next) => {
@@ -89,6 +165,15 @@ router.use('/protected_page', (err, req, res, next) => {
 // Error handling middleware for edit profile page
 router.use('/edit_profile', (err, req, res, next) => {
     res.render('edit_profile', { message: "You cannot view this page unless you are logged in." });
+});
+
+// Error handling middleware for admin page
+router.use('/admin', (err, req, res, next) => {
+    if (err.status === 403) {
+        res.render('login', { message: "You cannot view this page unless you are an admin!!!!"});
+    } else {
+        next(err);
+    }
 });
 
 module.exports = router;

@@ -1,0 +1,58 @@
+head
+    title Admin page
+    link(rel="stylesheet" href="/css/theme.min.css")
+
+if message 
+        // creates message box highlighted in red
+        body.text-center 
+            .container-fluid
+                // center content
+                .row.justify-content-center
+                    // take up 6 flexbox columns on medium screen, 8 columns on small screen
+                    .col-md-6.col-sm-8
+                        // display loaded message as a red alert
+                        .alert.alert-info #{message}
+                        
+body.text-center.bg-light
+        // create container that spans viewport
+        .container-fluid
+            // center content in container
+            .row.justify-content-center
+                // take up 4 flexbox columns /12 on medium screen, 8 on small screens
+                .col-md-10.col-sm-12
+                    // main content at top of page
+                    // center text and 4 unit bottom margin
+                    h2.text-center.mb-4.mt-4.text-primary Welcome #{id}!
+                    // New title for admin page
+                    h3.text-center.mb-4.text-success Welcome to the admin page
+
+                    // Table displaying users
+                    table.table.table-bordered
+                        thead
+                            tr
+                                th Username
+                                th Email
+                                th Status
+                                th Toggle Status
+                        tbody
+                            each user in users
+                                tr
+                                    td #{user.id}
+                                    td #{user.email}
+                                    td #{user.Disabled ? 'Disabled' : 'Enabled'}
+                                    td
+                                        form(action="/admin/toggle", method="post")
+                                            input(type="hidden", name="userId", value=user.id)
+                                            button.btn.btn-warning(type="submit") #{user.Disabled ? 'Enable' : 'Disable'}
+
+                    // secondary color button that redirects to logout page
+                    a.btn.btn-secondary.btn-lg.mb-2(href="/logout") Logout
+
+                    // spacer to push edit button to bottom
+                    .flex-grow-2
+
+                    
+
+        // create footer
+        footer
+            
