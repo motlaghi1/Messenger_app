@@ -4,6 +4,9 @@ function displayMessage(message, type) {
     item.classList.add('message-bubble', type);
     item.textContent = message;
     activeBox.appendChild(item);
+    
+    const chatMessagesContainer = document.querySelector('.chat-messages');
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputField = document.getElementById('messageInput');
     
     function sendMessage(message, roomId) {
-        displayMessage(message, 'sent');
+        displayMessage(message, 'from-me');
         
         if (roomId === null) {
             socket.emit('send-message', message);
@@ -28,6 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('response', (message) => {
-        displayMessage(message, 'received');
+        displayMessage(message, 'from-them');
     });
 });
