@@ -1,6 +1,7 @@
-function displayMessage(message) {
+function displayMessage(message, type) {
     const activeBox = document.querySelector(".chat-type.active")
-    const item = document.createElement('li');
+    const item = document.createElement('p');
+    item.classList.add('message-bubble', type);
     item.textContent = message;
     activeBox.appendChild(item);
 }
@@ -9,10 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
     const sendButton = document.getElementById('sendButton');
     const inputField = document.getElementById('messageInput');
-    const chatBox = document.getElementById('chatBox-glob');
     
     function sendMessage(message, roomId) {
-        displayMessage(`You: ${message}`);
+        displayMessage(message, 'sent');
         
         if (roomId === null) {
             socket.emit('send-message', message);
@@ -23,18 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     sendButton.addEventListener('click', function() {
         const message = inputField.value;
-        sendMessage(message, message);
-    });
 
-    socket.on('connect', () => {
-        console.log(`Connected to server with ID: ${socket.id}`);
+        sendMessage(message);
     });
 
     socket.on('response', (message) => {
-        displayMessage(message);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Disconnected from server');
+        displayMessage(message, 'received');
     });
 });
