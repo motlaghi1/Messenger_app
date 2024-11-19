@@ -1,14 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const messageSchema = mongoose.Schema({
-    type: String,         // 'global', 'group', or 'dm'
-    sender: String,       // User ID
-    recipient: String,    // User/Group ID (for non-global)
-    content: String,      // Message content
-    timestamp: Date,      // When sent
-    status: String,       // Message status
+const messageSchema = new mongoose.Schema({
+    content: {
+        type: String,
+        required: true
+    },
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    channel: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Channel',
+        required: true
+    },
+    timestamp: {
+        type: Date,
+        default: Date.now  
+    },
 });
 
 const Message = mongoose.model("message", messageSchema);
 
-module.export= {Message}
+module.exports = { Message };
