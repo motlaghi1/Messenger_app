@@ -36,7 +36,7 @@ export function displayMessage(user, message, type) {
     const now = new Date();
     const timestamp = now.toLocaleTimeString();
     const messageItem = document.createElement("div");
-    console.log(user);
+
     const messageClasses = type === 'sent'
         ? 'message sent p-3 mb-3'
         : 'message received shadow-sm p-3 mb-3';

@@ -13,9 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentUser = await response.json();
             return currentUser;
         }
+        
         let user = undefined;
         getCurrentUser().then((user) => {
-            console.log(user)
             displayMessage(user, message, 'sent');
             
             if (room === undefined || roomId === null) {

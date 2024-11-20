@@ -54,17 +54,19 @@ function switchChat(chatType) {
     navButtons.forEach(btn => {
         btn.classList.remove('active');
     });
+    console.log(chatType);
     
     // Activate clicked button
     const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
+    console.log(activeButton);
     if (activeButton) {
         activeButton.classList.add('active');
     }
 
     // Show/hide contacts
     if (dmContacts && groupContacts) {
-        dmContacts.classList.toggle('d-none', chatType !== 'dms');
-        groupContacts.classList.toggle('d-none', chatType !== 'groups');
+        dmContacts.classList.toggle('d-none', chatType !== 'dm');
+        groupContacts.classList.toggle('d-none', chatType !== 'group');
     }
 
     // Show/hide users list
@@ -79,6 +81,7 @@ function switchChat(chatType) {
     // Show appropriate chat
     chatTypes.forEach(chat => {
         chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
+        chat.classList.toggle('active', chat.id === `${chatType}Chat`);
     });
 
     // Update title
@@ -161,7 +164,7 @@ navButtons.forEach(button => {
 document.querySelectorAll('[data-chat-type]').forEach(button => {
     button.addEventListener('click', (e) => {
         const chatType = button.dataset.chatType;
-        if (['global', 'groups', 'dms'].includes(chatType)) {
+        if (['global', 'group', 'dm'].includes(chatType)) {
             e.preventDefault();
             switchChat(chatType);
         }
