@@ -13,14 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentUser = await response.json();
             return currentUser;
         }
-        let user = getCurrentUser();
-        displayMessage(getCurrentUser(), message, 'sent');
+        let user = undefined;
+        getCurrentUser().then((user) => {
+            console.log(user)
+            displayMessage(user, message, 'sent');
+            
+            if (room === undefined || roomId === null) {
+                socket.emit('send-message', user, message);
+            } else {
+                socket.emit('send-message', user, message, roomId);
+            }
+        })
         
-        if (room === undefined || roomId === null) {
-            socket.emit('send-message', getCurrentUser(), message);
-        } else {
-            socket.emit('send-message', getCurrentUser(), message, roomId);
-        }
     }
     
     groupModalButton.addEventListener('click', function() {
