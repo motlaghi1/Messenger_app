@@ -84,15 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Message sending handler
-    //- sendButton.addEventListener('click', () => {
-    //-     const message = messageInput.value.trim();
-    //-     if (message && currentChatId) {
-    //-         sendMessage(message);
-    //-         messageInput.value = '';
-    //-     }
-    //- });
-
     // Enter key handler
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {

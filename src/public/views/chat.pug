@@ -8,7 +8,7 @@ html(lang="en")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
         link(rel="stylesheet" href="/css/theme.min.css")
         script(src="/socket.io/socket.io.js")
-        script(src="/js/socket-client.js")
+        script(type="module", src="/js/socket-client.js")
         script(src="/js/chat-page.js")
         
         style.
@@ -158,7 +158,7 @@ html(lang="en")
                         .p-3.border-bottom
                             .d-flex.justify-content-between.align-items-center
                                 h5.mb-3 Group Chats
-                                button.btn.btn-sm.btn-primary#createGroup
+                                button.btn.btn-sm.btn-primary(type="button", data-bs-toggle="modal", data-bs-target="#groupModal")
                                     i.fas.fa-plus
                             .position-relative
                                 i.fas.fa-search.search-icon
@@ -211,6 +211,37 @@ html(lang="en")
                             button.btn.btn-primary#sendButton(type="submit" style="background-color: #6D54B8; border-color: #6D54B8;")
                                 i.fas.fa-paper-plane.me-1
                                 | Send
+
+        //- Modal for creating a group
+        div.modal#groupModal(
+            tabindex="-1",
+            aria-labelledby="groupModalLabel",
+            aria-hidden="true"
+            )
+            div.modal-dialog
+                div.modal-content
+                    div.modal-header
+                        h5.modal-title#groupModalLabel Create New Group
+                        button.btn-close(
+                        type="button",
+                        data-bs-dismiss="modal",
+                        aria-label="Close"
+                        )
+                    div.modal-body
+                        form#groupForm
+                        div.mb-3
+                            label(for="groupName") Group Name
+                            input#groupName.form-control(
+                            type="text",
+                            placeholder="Enter group name"
+                            )
+                    div.modal-footer
+                        button.btn.btn-secondary(
+                        type="button",
+                        data-bs-dismiss="modal"
+                        ) Cancel
+                        button#saveGroupButton.btn.btn-primary(type="button") Save
+
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js")
         //- script.
