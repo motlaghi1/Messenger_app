@@ -42,6 +42,7 @@ router.get('/api/users', checkSignIn, async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 });
+
 //optional for getting status
 router.get('/api/users/status', checkSignIn, async (req, res) => {
     try {
@@ -51,6 +52,12 @@ router.get('/api/users/status', checkSignIn, async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch user status' });
     }
 });
+
+router.get('/api/current_user', (req, res) => {
+    const user = req.session.user;
+    res.json(user);
+});
+
 
 // Admin page route, only accessible by admin users
 router.get('/admin', checkSignIn, checkAdmin, async (req, res) => {

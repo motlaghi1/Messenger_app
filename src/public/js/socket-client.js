@@ -1,4 +1,5 @@
 import { createContactItem, displayMessage } from './chat-helpers.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
     const sendButton = document.getElementById('sendButton');
@@ -7,12 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let room = null;
     
     function sendMessage(message, roomId) {
-        displayMessage(message, 'from-me');
+        async function getCurrentUser() {
+            const response = await fetch('/api/current_user');
+            const currentUser = await response.json();
+            return currentUser;
+        }
+        let user = getCurrentUser();
+        displayMessage(getCurrentUser(), message, 'sent');
         
         if (room === undefined || roomId === null) {
-            socket.emit('send-message', message);
+            socket.emit('send-message', getCurrentUser(), message);
         } else {
-            socket.emit('send-message', message, roomId);
+            socket.emit('send-message', getCurrentUser(), message, roomId);
         }
     }
     
@@ -51,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sendMessage(message, room);
     });
 
-    socket.on('response', (message) => {
-        displayMessage(message, 'from-them');
+    socket.on('response', (user, message) => {
+        displayMessage(user, message, 'received');
     });
 });

@@ -31,13 +31,33 @@ export function createContactItem({
     return contactItem;
 }
 
-export function displayMessage(message, type) {
+export function displayMessage(user, message, type) {
     const activeBox = document.querySelector(".chat-type.active")
-    const item = document.createElement('p');
-    item.classList.add('message-bubble', type);
-    item.textContent = message;
-    activeBox.appendChild(item);
-    
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString();
+    const messageItem = document.createElement("div");
+    console.log(user);
+    const messageClasses = type === 'sent'
+        ? 'message sent p-3 mb-3'
+        : 'message received shadow-sm p-3 mb-3';
+
+    const timestampClass = type === 'sent'
+        ? 'text-white-50 small mt-1'
+        : 'text-muted small mt-1';
+
+    const senderHTML = type !== 'sent'
+        ? `<div class="fw-semibold">${user.name}</div>`
+        : '';
+
+    // Build the inner HTML using a template literal
+    messageItem.innerHTML = `
+        <div class="message ${messageClasses}">
+            ${senderHTML}
+            <div>${message}</div>
+            <div class="${timestampClass}">${timestamp}</div>
+        </div>
+    `;
+    activeBox.appendChild(messageItem);
     const chatMessagesContainer = document.querySelector('.chat-messages');
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 }

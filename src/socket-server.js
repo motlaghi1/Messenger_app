@@ -2,13 +2,13 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log(`New connection: ${socket.id}`);
 
-        socket.on('send-message', (data, room) => {
+        socket.on('send-message', (user, data, room) => {
             console.log(`Message received: ${data} ${room}`);
             
             if (room === undefined || room === null) { // Global
-                socket.broadcast.emit('response', data);
+                socket.broadcast.emit('response', user, data);
             } else { // DM and Group
-                io.to(room).emit('response', data, room);
+                io.to(room).emit('response', user, data, room);
             }
         });
 
