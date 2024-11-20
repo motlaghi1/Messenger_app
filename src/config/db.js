@@ -2,7 +2,7 @@
 const uname = "deeterd1";
 const psword = "Xb0x4ly3r";
 const cluster = "messengerdb.sd589";
-const dbname = "";  
+const dbname = "MessageApp";  
 
 const uri = `mongodb+srv://${uname}:${psword}@${cluster}.mongodb.net/${dbname}?retryWrites=true&w=majority`;
 
