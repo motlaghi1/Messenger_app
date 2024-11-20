@@ -7,11 +7,12 @@ export function createContactItem({
     const contactItem = document.createElement('div');
     const iconClass = type === 'group' ? 'fas fa-users' : 'fas fa-user'
     contactItem.classList.add('contact-item', 'p-3');
+    const color = type === 'group' ? 'bg-primary' : 'bg-secondary'
 
     // Build the inner HTML using a template literal
     contactItem.innerHTML = `
         <div class="d-flex align-items-center">
-        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <div class="rounded-circle ${color} text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
             <i class="${iconClass}"></i>
         </div>
         <div class="ms-3">

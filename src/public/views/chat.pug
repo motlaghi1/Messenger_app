@@ -9,111 +9,16 @@ html(lang="en")
         link(rel="stylesheet" href="/css/theme.min.css")
         script(src="/socket.io/socket.io.js")
         script(type="module", src="/js/socket-client.js")
-        script(src="/js/chat-page.js")
+        script(type="module", src="/js/chat.js")
+        link(rel="stylesheet" href="/css/chat.css")
         
-        style.
-            :root {
-                --custom-purple: #6D54B8;
-            }
-            
-            body {
-                overflow-x: hidden;
-            }
-            
-            .nav-btn {
-                width: 40px;
-                height: 40px;
-                padding: 0 !important;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--custom-purple) !important;
-                background-color: transparent !important;
-                border: none !important;
-                transition: all 0.3s ease;
-            }
-            
-            .nav-btn:hover {
-                background-color: rgba(109, 84, 184, 0.1) !important;
-            }
-            
-            .nav-btn.active {
-                background-color: var(--custom-purple) !important;
-                color: white !important;
-            }
-            
-            .chat-messages {
-                height: calc(100vh - 140px);
-                overflow-y: auto;
-            }
-            
-            .message {
-                max-width: 75%;
-            }
-            
-            .message.sent {
-                margin-left: auto;
-            }
-
-            .search-input {
-                border-radius: 20px;
-                border: 1px solid #dee2e6;
-                padding-left: 35px;
-            }
-
-            .search-icon {
-                position: absolute;
-                left: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #6c757d;
-                z-index: 4;
-            }
-
-            .contact-list {
-                overflow-y: auto;
-                height: calc(100vh - 100px);
-            }
-
-            .contact-item {
-                cursor: pointer;
-                transition: all 0.2s ease;
-                border-radius: 8px;
-                margin: 0 8px 4px 8px;
-            }
-
-            .contact-item:hover {
-                background-color: rgba(109, 84, 184, 0.1);
-            }
-
-            .contact-item.active {
-                background-color: rgba(109, 84, 184, 0.2);
-            }
-
-            .contact-list::-webkit-scrollbar {
-                width: 6px;
-            }
-
-            .contact-list::-webkit-scrollbar-track {
-                background: #f1f1f1;
-            }
-
-            .contact-list::-webkit-scrollbar-thumb {
-                background: #888;
-                border-radius: 3px;
-            }
-
-            .contact-list::-webkit-scrollbar-thumb:hover {
-                background: #555;
-            }
-
     body.bg-light
         .container-fluid.p-0
             .row.g-0
                 //- Sidebar Navigation
                 .col-auto.bg-white.border-end.vh-100.d-flex.flex-column(style="width: 70px;")
                     .nav.flex-column.flex-grow-1.justify-content-start.align-items-center.py-3.gap-3
-                        a.btn.rounded-circle.nav-btn#profileBtn(href="/protected_page" title="Profile")
+                        a.button.btn.rounded-circle.nav-btn#profileBtn(title="Profile" href="/protected_page" )
                             i.fas.fa-user
                         button.btn.rounded-circle.nav-btn#globalBtn(title="Global Chat" data-chat-type="global")
                             i.fas.fa-globe
@@ -121,7 +26,7 @@ html(lang="en")
                             i.fas.fa-users
                         button.btn.rounded-circle.nav-btn#dmBtn(title="Direct Messages" data-chat-type="dms")
                             i.fas.fa-comments
-                        button.btn.rounded-circle.nav-btn#settingsBtn(title="Settings")
+                        button.btn.rounded-circle.nav-btn#settingsBtn(title="Settings" data-chat-type="settings")
                             i.fas.fa-cog
                     .nav.justify-content-center.py-3
                         a.btn.rounded-circle.nav-btn#logoutBtn(href="/logout" title="Logout")
@@ -136,7 +41,7 @@ html(lang="en")
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#dmSearch(type="text" placeholder="Search users...")
                         .contact-list.pt-2#dmList
-                            //- Sample DM contacts (replace with dynamic data)
+                            //- Sample DM contacts
                             .contact-item.p-3
                                 .d-flex.align-items-center
                                     .rounded-circle.bg-secondary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
@@ -164,7 +69,7 @@ html(lang="en")
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#groupSearch(type="text" placeholder="Search groups...")
                         .contact-list.pt-2#groupList
-                            //- Sample group contacts (replace with dynamic data)
+                            //- Sample group contacts
                             .contact-item.p-3
                                 .d-flex.align-items-center
                                     .rounded-circle.bg-primary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
@@ -179,6 +84,16 @@ html(lang="en")
                                     .ms-3
                                         .fw-semibold Gaming Group
                                         .text-muted.small 8 members
+                
+                //- Users List
+                .col-auto.bg-white.border-end.vh-100#usersList(style="width: 280px;")
+                    .d-flex.flex-column.h-100
+                        .p-3.border-bottom
+                            h5.mb-3 Online Users
+                            .position-relative
+                                i.fas.fa-search.search-icon
+                                input.form-control.search-input#userSearch(type="text" placeholder="Search users...")
+                        .contact-list.pt-2#globalUsersList
 
                 //- Main Chat Section
                 .col.bg-white
@@ -193,7 +108,7 @@ html(lang="en")
                     //- Chat Messages Area
                     .chat-messages.p-3.bg-light
                         #globalChat.chat-type.active
-                            //- Sample messages (replace with dynamic data)
+                            //- Sample messages
                             .message.received.bg-white.shadow-sm.p-3.mb-3
                                 .fw-semibold John Doe
                                 div Hello everyone!
@@ -244,126 +159,3 @@ html(lang="en")
 
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js")
-        //- script.
-            //- // State Management
-            //- let currentChatType = 'global';
-            //- let currentChatId = null;
-
-            //- // DOM Elements
-            //- const navButtons = document.querySelectorAll('[data-chat-type]');
-            //- const dmContacts = document.getElementById('dmContacts');
-            //- const groupContacts = document.getElementById('groupContacts');
-            //- const chatTypes = document.querySelectorAll('.chat-type');
-            //- const currentChatTitle = document.getElementById('currentChat');
-            //- const messageInput = document.getElementById('messageInput');
-            //- const sendButton = document.getElementById('sendButton');
-
-            //- // Search Functionality
-            //- function setupSearch(searchId, listId) {
-            //-     const searchInput = document.getElementById(searchId);
-            //-     const list = document.getElementById(listId);
-                
-            //-     searchInput.addEventListener('input', function() {
-            //-         const searchTerm = this.value.toLowerCase();
-            //-         const items = list.getElementsByClassName('contact-item');
-                    
-            //-         Array.from(items).forEach(item => {
-            //-             const text = item.textContent.toLowerCase();
-            //-             item.style.display = text.includes(searchTerm) ? '' : 'none';
-            //-         });
-            //-     });
-            //- }
-
-            //- // Initialize search
-            //- setupSearch('dmSearch', 'dmList');
-            //- setupSearch('groupSearch', 'groupList');
-
-            //- // Chat Switching Function
-            //- function switchChat(chatType) {
-            //-     // Reset navigation buttons
-            //-     navButtons.forEach(btn => {
-            //-         btn.classList.remove('active');
-            //-     });
-                
-            //-     // Activate clicked button
-            //-     const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
-            //-     if (activeButton) {
-            //-         activeButton.classList.add('active');
-            //-     }
-
-            //-     // Show/hide contacts
-            //-     dmContacts.classList.toggle('d-none', chatType !== 'dms');
-            //-     groupContacts.classList.toggle('d-none', chatType !== 'groups');
-
-            //-     // Show appropriate chat
-            //-     chatTypes.forEach(chat => {
-            //-         chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
-            //-     });
-
-            //-     // Update title
-            //-     currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-            //-                                 chatType === 'groups' ? 'Select a Group' : 
-            //-                                 'Select a Conversation';
-
-            //-     // Update state
-            //-     currentChatType = chatType;
-            //-     currentChatId = chatType === 'global' ? 'global' : null;
-
-            //-     // Load messages
-            //-     loadMessages(chatType);
-            //- }
-
-            //- // Navigation handlers
-            //- navButtons.forEach(button => {
-            //-     button.addEventListener('click', () => {
-            //-         const chatType = button.dataset.chatType;
-            //-         switchChat(chatType);
-            //-     });
-            //- });
-
-            //- // Contact item handlers
-            //- document.querySelectorAll('.contact-item').forEach(item => {
-            //-     item.addEventListener('click', function() {
-            //-         document.querySelectorAll('.contact-item').forEach(i => 
-            //-             i.classList.remove('active'));
-            //-         this.classList.add('active');
-            //-     });
-            //- });
-
-            //- // Message sending handler
-            //- //- sendButton.addEventListener('click', () => {
-            //- //-     const message = messageInput.value.trim();
-            //- //-     if (message && currentChatId) {
-            //- //-         sendMessage(message);
-            //- //-         messageInput.value = '';
-            //- //-     }
-            //- //- });
-
-            //- // Enter key handler
-            //- messageInput.addEventListener('keypress', (e) => {
-            //-     if (e.key === 'Enter' && !e.shiftKey) {
-            //-         e.preventDefault();
-            //-         sendButton.click();
-            //-     }
-            //- });
-
-            //- // Message loading function
-            //- function loadMessages(chatType, chatId = null) {
-            //-     const chatContainer = document.getElementById(`${chatType}Chat`);
-            //-     // Here you would typically fetch messages from your server
-            //-     chatContainer.innerHTML = `
-            //-         <div class="text-center text-muted py-5">
-            //-             <i class="fas fa-comments fa-2x mb-3"></i>
-            //-             <p>Loading ${chatType} messages...</p>
-            //-         </div>
-            //-     `;
-            //- }
-
-            //- // Message sending function
-            //- function sendMessage(message) {
-            //-     console.log(`Sending message to ${currentChatType}:`, message);
-            //-     // Here you would typically send the message to your server
-            //- }
-
-            //- // Initialize with global chat
-            //- switchChat('global');

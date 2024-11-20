@@ -65,7 +65,7 @@ router.post('/signup', async (req, res) => {
         
         const newUser = await userModel.addUser(id, password, name, email, UDid);
         req.session.user = newUser;
-        res.redirect('/protected_page');
+        res.redirect('/chat');
     } catch (err) {
         console.error("Signup error: ", err);
         res.render('signup', { message: "An error occurred, please try again." });
