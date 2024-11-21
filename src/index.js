@@ -12,7 +12,8 @@ const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 const db = require('./config/db');
-const userModel = require('./models/user');
+
+const socketHandler = require('./socket-server');
 
 // Middleware setup
 app.use(cookieParser());
@@ -30,7 +31,7 @@ app.use(multer().array());
 app.set('view engine', 'pug'); 
 app.set('views', path.join(__dirname, '../src/public/views'));
 app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
-app.use('/js', express.static(path.join(__dirname)));
+app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
 
 
 // Logging middleware for tracking current users
@@ -57,12 +58,11 @@ app.use('/', async (req, res, next) => {
 app.use('/', auth);
 app.use('/', protected);
 
+// Attach socket.io logic
+socketHandler(io);
+
 // Server setup
 const port = process.env.PORT || 8080;
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 });
-
-io.on('connection', (socket) => {
-    console.log(socket.id)
-})

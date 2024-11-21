@@ -27,6 +27,32 @@ const checkSignIn = (req, res, next) => {
     }
 };
 
+router.get('/api/users', checkSignIn, async (req, res) => {
+    try {
+        const users = await getUsers();
+        const safeUserData = users
+            .filter(user => !user.Disabled) // Exclude disabled users
+            .map(user => ({
+                id: user.id,
+                name: user.name,
+                online: true // You can implement real online status later
+            }));
+        res.json(safeUserData);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+//optional for getting status
+router.get('/api/users/status', checkSignIn, async (req, res) => {
+    try {
+        const onlineUsers = new Set(); // Implement your online tracking logic
+        res.json({ onlineUsers: Array.from(onlineUsers) });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user status' });
+    }
+});
+
 // Admin page route, only accessible by admin users
 router.get('/admin', checkSignIn, checkAdmin, async (req, res) => {
     try {
