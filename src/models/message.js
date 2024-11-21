@@ -19,12 +19,10 @@ const messageSchema = new mongoose.Schema({
     timestamp: {
         type: Date,
         default: Date.now  
-    },
+    }
 });
 
 const Message = mongoose.model("message", messageSchema);
-
-module.exports = { Message };
 
 //send a message
 async function sendMessage(senderID, channelID, content) {

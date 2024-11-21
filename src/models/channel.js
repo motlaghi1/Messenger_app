@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 
 const channelSchema = new mongoose.Schema({
-    name: String,
+    name: {
+        type:String,
+        required: true
+    },
     type: {
         type: String,
         enum: ['global', 'direct', 'group'],
@@ -15,10 +18,28 @@ const channelSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Message' 
     }],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: {type: Date, default: Date.now()},
+    updatedAt: {type: Date, default: Date.now()}
 });
+
+//creates new channel
+async function createChannel(channelName, channelType, [participants]) {
+    const channel = new Channel({
+        channelName,
+        channelType,
+        participants,
+    });
+
+    return await channel.save();
+}
+
+async function updateChannel(channelID, [newParticipants]) {
+    return await Channel.findOneAndUpdate(
+        { id: channelID },
+        { $push: {participants: newParticipants}}
+    );
+}
 
 const Channel = mongoose.model("channel", channelSchema);
 
-module.exports = { Channel };
+module.exports = { Channel, createChannel, updateChannel };

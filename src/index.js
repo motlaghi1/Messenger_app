@@ -7,13 +7,12 @@ const mongoose = require('mongoose');
 const app = express();
 const auth = require('./routes/auth');
 const protected = require('./routes/protected');
-const directMessages = require('./routes/directMessages');
 const path = require('path');
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 const db = require('./config/db');
-
+const userModel = require('./models/user');
 
 // Middleware setup
 app.use(cookieParser());
@@ -36,7 +35,7 @@ app.use('/js', express.static(path.join(__dirname)));
 
 // Logging middleware for tracking current users
 
-const userModel = require('./models/user');
+
 app.use('/', async (req, res, next) => {
     try {
         const users = await userModel.getUsers();
@@ -57,7 +56,6 @@ app.use('/', async (req, res, next) => {
 // Routes
 app.use('/', auth);
 app.use('/', protected);
-app.use('/', directMessages);
 
 // Server setup
 const port = process.env.PORT || 8080;

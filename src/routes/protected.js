@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { updateUser, findUserById, getUsers } = require('../models/user.js'); 
 const mongoose = require('mongoose');
+const { sendMessage } = require('../models/message.js');
 
 
 // Middleware to check if the user is an admin
@@ -42,6 +43,7 @@ router.get('/chat', checkSignIn, (req, res) => {
     res.render('chat', { 
         user: req.session.user,
         currentPage: 'chat' });
+    sendMessage("global", "test");
 });
 
 //API route for chat
