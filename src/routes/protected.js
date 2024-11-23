@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { updateUser, findUserById, getUsers } = require('../models/user.js'); 
 const mongoose = require('mongoose');
+const { Channel } = require('../models/channel');
+const { Message } = require('../models/message');
 
 
 // Middleware to check if the user is an admin
@@ -25,6 +27,142 @@ const checkSignIn = (req, res, next) => {
         return next(err);
     }
 };
+
+// Add this route to your existing protected.js
+router.get('/api/current-user', checkSignIn, (req, res) => {
+    // Return safe user data
+    res.json({
+        id: req.session.user.id,
+        name: req.session.user.name,
+        email: req.session.user.email
+    });
+});
+
+router.get('/api/channels/:channelId/messages', checkSignIn, async (req, res) => {
+    try {
+        let channel;
+        if (req.params.channelId === 'global') {
+            channel = await Channel.findOne({ type: 'global' })
+                .populate({
+                    path: 'messages',
+                    populate: {
+                        path: 'sender',
+                        select: 'name id'
+                    }
+                });
+        } else {
+            channel = await Channel.findById(req.params.channelId)
+                .populate({
+                    path: 'messages',
+                    populate: {
+                        path: 'sender',
+                        select: 'name id'
+                    }
+                });
+        }
+
+        if (!channel) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+
+        res.json(channel.messages || []);
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
+//sending messages
+router.post('/api/channels/:channelId/messages', checkSignIn, async (req, res) => {
+    try {
+        const channel = req.params.channelId === 'global' 
+            ? await Channel.findOne({ type: 'global' })
+            : await Channel.findById(req.params.channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+
+        const message = new Message({
+            content: req.body.content,
+            sender: req.session.user._id,
+            timestamp: new Date()
+        });
+
+        await message.save();
+        channel.messages.push(message._id);
+        await channel.save();
+
+        const populatedMessage = await Message.findById(message._id)
+            .populate('sender', 'name id');
+
+        res.json(populatedMessage);
+    } catch (error) {
+        console.error('Error creating message:', error);
+        res.status(500).json({ error: 'Failed to create message' });
+    }
+});
+
+router.post('/api/channels', checkSignIn, async (req, res) => {
+    try {
+        const { type, name, participants } = req.body;
+        let channel;
+
+        switch (type) {
+            case 'global':
+                channel = await Channel.findOne({ type: 'global' });
+                if (!channel) {
+                    channel = await new Channel({
+                        name: 'Global Chat',
+                        type: 'global',
+                        participants: [],
+                        messages: []
+                    }).save();
+                }
+                break;
+                
+            case 'direct':
+                if (!participants || participants.length !== 2) {
+                    return res.status(400).json({ error: 'Direct messages require exactly 2 participants' });
+                }
+                channel = await Channel.findOne({
+                    type: 'direct',
+                    participants: { 
+                        $all: participants,
+                        $size: 2
+                    }
+                });
+                if (!channel) {
+                    channel = await new Channel({
+                        name: `DM: ${participants.join(' & ')}`,
+                        type: 'direct',
+                        participants,
+                        messages: []
+                    }).save();
+                }
+                break;
+
+            case 'group':
+                if (!name || !participants || participants.length < 2) {
+                    return res.status(400).json({ error: 'Group channels require a name and at least 2 participants' });
+                }
+                channel = await new Channel({
+                    name,
+                    type: 'group',
+                    participants,
+                    messages: []
+                }).save();
+                break;
+
+            default:
+                return res.status(400).json({ error: 'Invalid channel type' });
+        }
+
+        res.json(channel);
+    } catch (error) {
+        console.error('Error creating channel:', error);
+        res.status(500).json({ error: 'Failed to create channel' });
+    }
+});
 
 router.get('/api/users', checkSignIn, async (req, res) => {
     try {
