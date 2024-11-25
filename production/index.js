@@ -60,7 +60,7 @@ app.use('/', async (req, res, next) => {
     next(); // Ensure next middleware is called
 });
 
-// Routes
+// Routes for the site
 app.use('/', auth);
 app.use('/', protected);
 
