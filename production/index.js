@@ -36,9 +36,9 @@ io.use((socket, next) => {
 
 // View engine setup
 app.set('view engine', 'pug'); 
-app.set('views', path.join(__dirname, './public/views'));
-app.use('/css', express.static(path.join(__dirname, './public/css')));
-app.use('/js', express.static(path.join(__dirname, './public/js')));
+app.set('views', path.join(__dirname, '../src/public/views'));
+app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
+app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
 
 // Logging middleware for tracking current users
 
@@ -60,7 +60,7 @@ app.use('/', async (req, res, next) => {
     next(); // Ensure next middleware is called
 });
 
-// Routes for the site
+// Routes
 app.use('/', auth);
 app.use('/', protected);
 
