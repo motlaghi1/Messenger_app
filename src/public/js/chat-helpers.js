@@ -99,7 +99,7 @@ export async function loadDirectMessages() {
                         // Update chat title
                         const currentChatTitle = document.getElementById('currentChat');
                         if (currentChatTitle) {
-                            currentChatTitle.textContent = `Chat with ${otherParticipant.name}`;
+                            currentChatTitle.textContent = `${otherParticipant.name}`;
                         }
 
                         // Show correct chat container
