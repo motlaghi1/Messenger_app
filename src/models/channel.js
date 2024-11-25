@@ -85,11 +85,5 @@ channelSchema.statics.getChannelMessages = async function(channelId) {
 const Channel = mongoose.model("Channel", channelSchema);
 
 module.exports = { 
-  Channel, 
-  createChannel, 
-  updateChannel, 
-  sendMessage,
-  getMessageHistory,
-  getChannelParticipantCount, 
-  getUserChannels 
+  Channel
 };
