@@ -1,0 +1,40 @@
+//all bootstrap code sourced from https://getbootstrap.com/docs/5.3/getting-started/introduction/
+
+html 
+    head 
+        title Signup 
+        link(rel="stylesheet" href="/css/theme.min.css")
+    body.bg-light
+        //center content and create top margin of 5 units
+        .container.mt-5
+            //conditional message display
+            if message
+                //creates message box highlighted in blue
+                .alert.alert-info #{message}
+            
+            //center content
+            .row.justify-content-center
+                //take up 4 flexbox columns /12 on medium screen, 8 on small screens
+                .col-md-4.col-sm-8
+                    //center text and 4 unit bottom margin
+                    h2.text-center.mb-4.text-primary Signup
+                    //create signup box with border, 4 unit padding, round corners, drop shadow
+                    form(action="/signup" method="POST" class="border p-4 rounded shadow")
+                        //bottom margin of 3 between form elements
+                        .mb-3
+                            //small bootstrap form field
+                            input.form-control.form-control-sm(name="id" type="text" required placeholder="User ID")
+                        .mb-3
+                            input.form-control.form-control-sm(name="password" type="password" required placeholder="Password")
+                        .mb-3
+                            input.form-control.form-control-sm(name="name" type="text" required placeholder="Name")
+                        .mb-3
+                            input.form-control.form-control-sm(name="email" type="text" required placeholder="Email")
+                        .mb-3
+                            input.form-control.form-control-sm(name="UDid" type="text" required placeholder="UDid")            
+                        //d-grid stretches signup button across entire signup box
+                        .d-grid.gap-2
+                            //btn makes button, btn-primary colors it blue, btn-sm makes it smaller
+                            button.btn.btn-primary.btn-sm(type="submit") Sign up!
+                            //secondary color button that redirects to login page
+                            a.btn.btn-secondary.btn-sm(href="/login") Already have an account? Login

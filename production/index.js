@@ -42,7 +42,7 @@ app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
 
 // Logging middleware for tracking current users
 
-
+const userModel = require('./models/user');
 app.use('/', async (req, res, next) => {
     try {
         const users = await userModel.getUsers();

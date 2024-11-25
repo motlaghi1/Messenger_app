@@ -1,9 +1,9 @@
-import { createContactItem, formatMessage, loadDirectMessages, loadGroupChats, loadChannelMessages } from "./chat-helpers.js";
+import { createContactItem, formatMessage } from "./chat-helpers.js";
 
 // State Management
-window.currentChatType = 'global';
-window.currentChannelId = 'global';
-window.currentUserId = null;
+let currentChatType = 'global';
+let currentChatId = null;
+let currentUserId = null;
 
 // DOM Elements
 const navButtons = document.querySelectorAll('[data-chat-type]');
@@ -17,17 +17,36 @@ const usersList = document.getElementById('usersList');
 const globalUsersList = document.getElementById('globalUsersList');
 const refreshButton = document.getElementById('refreshBtn');
 
+// Load channel messages
+async function loadChannelMessages(channelId) {
+    try {
+        const response = await fetch(`/api/channels/${channelId}/messages`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch messages');
+        }
+        const messages = await response.json();
+        
+        const chatContainer = document.querySelector(`#${currentChatType}Chat`);
+        if (chatContainer) {
+            chatContainer.innerHTML = messages.map(msg => 
+                formatMessage(msg.content, msg.sender.name, msg.timestamp, msg.sender.id === currentUserId)
+            ).join('');
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+    }
+}
 
 // Chat Switching Function
-async function switchChat(chatType, channelId = null) {
-    // Update state
-    window.currentChatType = chatType;
-    window.currentChannelId = channelId || (chatType === 'global' ? 'global' : null);
-    
+async function switchChat(chatType) {
     // Reset navigation buttons
     navButtons.forEach(btn => {
         btn.classList.remove('active');
     });
+    console.log(chatType);
     
     // Activate clicked button
     const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
@@ -46,7 +65,7 @@ async function switchChat(chatType, channelId = null) {
         usersList.classList.toggle('d-none', chatType !== 'global');
     }
 
-    // Show appropriate chat container and hide others
+    // Show appropriate chat
     chatTypes.forEach(chat => {
         chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
         chat.classList.toggle('active', chat.id === `${chatType}Chat`);
@@ -55,45 +74,18 @@ async function switchChat(chatType, channelId = null) {
     // Update title
     if (currentChatTitle) {
         currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-                                     chatType === 'group' ? 'Select a Group' : 
-                                     'Select a Conversation';
+                                    chatType === 'groups' ? 'Select a Group' : 
+                                    'Select a Conversation';
     }
 
-    // Load appropriate content based on chat type
+    // Update state
+    currentChatType = chatType;
+    currentChatId = chatType === 'global' ? 'global' : null;
+
+    // Load messages if it's global chat
     if (chatType === 'global') {
         await loadUsers();
-        await loadChannelMessages('global');
-    } else if (chatType === 'dm') {
-        await loadDirectMessages();
-    } else if (chatType === 'group') {
-        await loadGroupChats();
-    }
-}
-
-// Load users function
-async function loadUsers() {
-    try {
-        const response = await fetch('/api/users');
-        const users = await response.json();
-        
-        if (globalUsersList) {
-            globalUsersList.innerHTML = '';
-            
-            users.forEach(user => {
-                if (user.id !== currentUserId) {
-                    const contactItem = createContactItem({
-                        type: 'contact',
-                        contactName: user.name,
-                        subText: 'Online',
-                        userId: user._id,
-                        showDmButton: true
-                    });
-                    globalUsersList.appendChild(contactItem);
-                }
-            });
-        }
-    } catch (error) {
-        console.error('Error loading users:', error);
+        await loadChannelMessages('global'); // TODO: LOAD ALL CHATS ON SWITCH
     }
 }
 
@@ -102,34 +94,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Initializing chat...');
         
-        // Get current user info first
+        // Create global channel if it doesn't exist
+        const response = await fetch('/api/channels', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: 'global'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create global channel');
+        }
+
+        // Get current user info
         const userResponse = await fetch('/api/current-user');
         if (userResponse.ok) {
             const userData = await userResponse.json();
-            window.currentUserId = userData.id;
-            console.log('Current user ID:', window.currentUserId);
+            currentUserId = userData.id;
+            console.log('Current user ID:', currentUserId);
         }
-
+        console.log(navButtons)
         // Set up event listeners for nav buttons
         navButtons.forEach(button => {
-            button.addEventListener('click', async () => {
+            button.addEventListener('click', () => {
+                console.log('init nav buttons')
                 const chatType = button.dataset.chatType;
                 if (['global', 'group', 'dm'].includes(chatType)) {
-                    await switchChat(chatType);
+                    switchChat(chatType);
                 }
             });
         });
 
-        // Set up message input handlers
-        if (messageInput && sendButton) {
-            sendButton.addEventListener('click', async () => {
-                const message = messageInput.value.trim();
-                if (message && window.currentChannelId) {
-                    await sendMessage(message, window.currentChannelId);
-                    messageInput.value = '';
+        // Set up refresh button
+        if (refreshButton) {
+            refreshButton.addEventListener('click', () => {
+                if (currentChatId) {
+                    loadChannelMessages(currentChatId);
                 }
             });
+        }
 
+        // Set up message input handlers
+        if (messageInput && sendButton) {
+
+            // Enter key handler
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -138,41 +149,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
-        // Set up refresh button
-        if (refreshButton) {
-            refreshButton.addEventListener('click', async () => {
-                if (window.currentChannelId) {
-                    await loadChannelMessages(window.currentChannelId);
-                }
-            });
-        }
+        // Initialize search functionality
+        setupSearch('dmSearch', 'dmList');
+        setupSearch('groupSearch', 'groupList');
+        setupUserSearch();
 
-        // Initialize chat
+        // Start with global chat
         await switchChat('global');
-        
     } catch (error) {
         console.error('Error initializing chat:', error);
     }
 });
 
-async function sendMessage(message, channelId) {
-    if (!channelId) return;
-
+// Load users function
+async function loadUsers() {
     try {
-        const response = await fetch(`/api/channels/${channelId}/messages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ content: message })
-        });
+        const response = await fetch('/api/users');
+        const users = await response.json();
+        
+        if (globalUsersList) {
+            // Clear existing content
+            globalUsersList.innerHTML = '';
 
-        if (!response.ok) throw new Error('Failed to send message');
-
-        // Load updated messages for the current channel
-        await loadChannelMessages(window.currentChannelId);
+            // Append each contact item
+            users.forEach(user => {
+                const contactItem = createContactItem({
+                    type: 'contact',
+                    contactName: user.name,
+                    subText: user.id,
+                });
+                globalUsersList.appendChild(contactItem);
+            });
+        }
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error loading users:', error);
     }
 }
 
@@ -194,6 +204,7 @@ function setupSearch(searchId, listId) {
     }
 }
 
+// Setup search for all users
 function setupUserSearch() {
     const userSearch = document.getElementById('userSearch');
     if (userSearch && globalUsersList) {
@@ -209,6 +220,16 @@ function setupUserSearch() {
     }
 }
 
-export function getCurrentChatId() {
-    return currentChannelId;
+export function getCurrentChatId () {
+    return currentChatId;
 }
+
+// Auto refresh messages periodically
+// setInterval(() => { // TODO: REMOVE INTERVAL RELOAD
+//     if (currentChatId) {
+//         loadChannelMessages(currentChatId);
+//     }
+// }, 5000); // Refresh every 5 seconds
+
+// // Auto refresh users list periodically
+// setInterval(loadUsers, 30000); // Refresh every 30 seconds

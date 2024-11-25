@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { updateUser, findUserById, getUsers } = require('../models/user.js'); 
 const mongoose = require('mongoose');
 const { Channel } = require('../models/channel');
 const { Message } = require('../models/message');
 const { sendMessage } = require('../services/messageService'); 
-const {User, findUser, findUserById, addUser, updateUser, getUsers, deleteUser} = require('../models/user');
-
 
 
 // Middleware to check if the user is an admin
@@ -38,36 +37,6 @@ router.get('/api/current-user', checkSignIn, (req, res) => {
         name: req.session.user.name,
         email: req.session.user.email
     });
-});
-
-router.get('/api/channels/direct', checkSignIn, async (req, res) => {
-    try {
-        const currentUserId = new mongoose.Types.ObjectId(req.session.user._id);
-        const channels = await Channel.find({
-            type: 'direct',
-            participants: currentUserId
-        }).populate('participants', 'name _id id');
-        
-        res.json(channels);
-    } catch (error) {
-        console.error('Error fetching DM channels:', error);
-        res.status(500).json({ error: 'Failed to fetch DM channels' });
-    }
-});
-
-router.get('/api/channels/group', checkSignIn, async (req, res) => {
-    try {
-        const currentUserId = new mongoose.Types.ObjectId(req.session.user._id);
-        const channels = await Channel.find({
-            type: 'group',
-            participants: currentUserId
-        }).populate('participants', 'name _id id');
-        
-        res.json(channels);
-    } catch (error) {
-        console.error('Error fetching group channels:', error);
-        res.status(500).json({ error: 'Failed to fetch group channels' });
-    }
 });
 
 router.get('/api/channels/:channelId/messages', checkSignIn, async (req, res) => {
@@ -136,35 +105,23 @@ router.post('/api/channels', checkSignIn, async (req, res) => {
                     }).save();
                 }
                 break;
-
+                
             case 'direct':
-                if (!participants || participants.length !== 1) {
-                    return res.status(400).json({ error: 'Direct messages require exactly 1 participant' });
+                if (!participants || participants.length !== 2) {
+                    return res.status(400).json({ error: 'Direct messages require exactly 2 participants' });
                 }
-
-                const participantId = new mongoose.Types.ObjectId(participants[0]);
-                const currentUserId = new mongoose.Types.ObjectId(req.session.user._id);
-
-                // Get the other participant's name for the channel name
-                const otherUser = await User.findById(participantId);
-                if (!otherUser) {
-                    return res.status(404).json({ error: 'User not found' });
-                }
-
-                // Check for existing DM channel
                 channel = await Channel.findOne({
                     type: 'direct',
                     participants: { 
-                        $all: [currentUserId, participantId],
+                        $all: participants,
                         $size: 2
                     }
                 });
-
                 if (!channel) {
                     channel = await new Channel({
-                        name: `Chat with ${otherUser.name}`, // Use other participant's name
+                        name: `DM: ${participants.join(' & ')}`,
                         type: 'direct',
-                        participants: [currentUserId, participantId],
+                        participants,
                         messages: []
                     }).save();
                 }
@@ -174,11 +131,10 @@ router.post('/api/channels', checkSignIn, async (req, res) => {
                 if (!name || !participants || participants.length < 2) {
                     return res.status(400).json({ error: 'Group channels require a name and at least 2 participants' });
                 }
-                const participantIds = participants.map(id => new mongoose.Types.ObjectId(id));
                 channel = await new Channel({
                     name,
                     type: 'group',
-                    participants: [new mongoose.Types.ObjectId(req.session.user._id), ...participantIds],
+                    participants,
                     messages: []
                 }).save();
                 break;
@@ -187,8 +143,6 @@ router.post('/api/channels', checkSignIn, async (req, res) => {
                 return res.status(400).json({ error: 'Invalid channel type' });
         }
 
-        // Populate the participants before sending response
-        channel = await channel.populate('participants', 'name _id id');
         res.json(channel);
     } catch (error) {
         console.error('Error creating channel:', error);
@@ -203,7 +157,6 @@ router.get('/api/users', checkSignIn, async (req, res) => {
             .filter(user => !user.Disabled) // Exclude disabled users
             .map(user => ({
                 id: user.id,
-                _id: user._id,  // Include MongoDB _id
                 name: user.name,
                 online: true // You can implement real online status later
             }));
@@ -246,7 +199,6 @@ router.get('/chat', checkSignIn, (req, res) => {
     res.render('chat', { 
         user: req.session.user,
         currentPage: 'chat' });
-    sendMessage("global", "test");
 });
 
 //API route for chat

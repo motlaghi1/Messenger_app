@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { Message } = require("./message");
 
 const channelSchema = new mongoose.Schema({
     name: String,
@@ -84,12 +83,4 @@ channelSchema.statics.getChannelMessages = async function(channelId) {
 
 const Channel = mongoose.model("Channel", channelSchema);
 
-module.exports = { 
-  Channel, 
-  createChannel, 
-  updateChannel, 
-  sendMessage,
-  getMessageHistory,
-  getChannelParticipantCount, 
-  getUserChannels 
-};
+module.exports = { Channel };
