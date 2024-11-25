@@ -10,29 +10,35 @@ const protected = require('./routes/protected');
 const path = require('path');
 const http = require('http');
 const server = http.createServer(app);
-const io = require('socket.io')(server);
+const socketIO = require('socket.io');
+const io = socketIO(server); // Changed this line
 const db = require('./config/db');
 
 const socketHandler = require('./socket-server');
 
-// Middleware setup
-app.use(cookieParser());
-
-app.use(session({
+// Session middleware setup
+const sessionMiddleware = session({
     secret: "Buckeyes",
     resave: true,
     saveUninitialized: true
-}));
+});
+
+app.use(cookieParser());
+app.use(sessionMiddleware);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer().array());
+
+// Share session middleware with Socket.IO
+io.use((socket, next) => {
+    sessionMiddleware(socket.request, socket.request.res || {}, next);
+});
 
 // View engine setup
 app.set('view engine', 'pug'); 
 app.set('views', path.join(__dirname, '../src/public/views'));
 app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
 app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
-
 
 // Logging middleware for tracking current users
 

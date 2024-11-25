@@ -1,14 +1,31 @@
+// src/socket-server.js
+const { sendMessage } = require('./services/messageService');
+
 module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log(`New connection: ${socket.id}`);
 
-        socket.on('send-message', (user, data, room) => {
-            console.log(`Message received: ${data} ${room}`);
-            
-            if (room === undefined || room === null) { // Global
-                socket.broadcast.emit('response', user, data);
-            } else { // DM and Group
-                io.to(room).emit('response', user, data, room);
+        socket.on('send-message', async (data, chatId = 'global') => {
+            try {
+                const user = socket.request.session.user;
+                if (!user) {
+                    console.error('User not authenticated');
+                    return;
+                }
+
+                const message = await sendMessage(chatId, data, user._id);
+                console.log('Message sent:', message);
+
+                // Broadcast the message to other clients
+                if (chatId === 'global') {
+                    socket.broadcast.emit('response', user, data, chatId);
+                    console.log('Emitting to global chat');
+                } else {
+                    io.to(chatId).emit('response', user, data, chatId);
+                    console.log(`Emitting to chat room ${chatId}`);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
             }
         });
 

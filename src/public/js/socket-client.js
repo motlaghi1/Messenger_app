@@ -1,30 +1,30 @@
-import { createContactItem, displayMessage } from './chat-helpers.js';
+import { createContactItem, displayMessage , formatMessage } from './chat-helpers.js';
+import { getCurrentChatId } from './chat.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
     const sendButton = document.getElementById('sendButton');
     const inputField = document.getElementById('messageInput');
     const groupModalButton = document.getElementById('saveGroupButton');
-    let room = null;
     
-    function sendMessage(message, roomId) {
+    function sendMessage(message, chatId) {
         async function getCurrentUser() {
             const response = await fetch('/api/current_user');
             const currentUser = await response.json();
             return currentUser;
         }
         
-        let user = undefined;
         getCurrentUser().then((user) => {
-            displayMessage(user, message, 'sent');
-            
-            if (room === undefined || roomId === null) {
-                socket.emit('send-message', user, message);
+            displayMessage(
+                formatMessage(message, user.name, Date.now(), true),
+            );
+            console.log('chat id: ', chatId);
+            if (!chatId) {
+                socket.emit('send-message', message);
             } else {
-                socket.emit('send-message', user, message, roomId);
+                socket.emit('send-message', message, chatId);
             }
-        })
-        
+        });
     }
     
     groupModalButton.addEventListener('click', function() {
@@ -57,12 +57,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sendButton.addEventListener('click', function() {
-        const message = inputField.value;
-
-        sendMessage(message, room);
+        const message = inputField.value.trim();
+        if (message) {
+            sendMessage(message, getCurrentChatId());
+            inputField.value = ''; // Clear the input field
+        }
     });
 
-    socket.on('response', (user, message) => {
-        displayMessage(user, message, 'received');
+    socket.on('response', (user, message, chatId) => {
+        if (chatId != getCurrentChatId()) { return } // Doesn't need socket if window not open
+        displayMessage(
+            formatMessage(message, user.name, Date.now(), false)
+        );
     });
 });

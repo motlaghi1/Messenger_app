@@ -10,17 +10,33 @@ const messageSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    channel: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Channel',
-        required: true
-    },
     timestamp: {
         type: Date,
-        default: Date.now  
-    },
+        default: Date.now
+    }
 });
 
-const Message = mongoose.model("message", messageSchema);
+messageSchema.statics.createMessage = async function(channelId, senderId, content) {
+    const message = new this({
+        content,
+        sender: senderId,
+        timestamp: new Date()
+    });
+
+    const savedMessage = await message.save();
+
+    // Update the channel with the new message
+    await mongoose.model('Channel').findByIdAndUpdate(
+        channelId,
+        { 
+            $push: { messages: savedMessage._id },
+            updatedAt: new Date()
+        }
+    );
+
+    return savedMessage;
+};
+
+const Message = mongoose.model("Message", messageSchema);
 
 module.exports = { Message };
