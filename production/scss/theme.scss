@@ -1,0 +1,193 @@
+// Custom Theme
+$primary: #6D54B8;
+$secondary: #56b7ae;
+$danger: #B00020;
+$light: #FFFFFF;
+
+// Import Bootstrap
+@import '../../node_modules/bootstrap/scss/bootstrap';
+
+.message {
+    color: #efefef
+}
+
+.message.sent {
+    background-color: $primary;
+}
+
+.message.received {
+    background-color: $secondary;
+}
+
+// // Chat Message Styling
+// .chat-type {
+//     background-color: #fff;
+//     display: flex;
+//     flex-direction: column;
+//     align-items: flex-start; // Added this line
+//     font-family: "SanFrancisco";
+//     font-size: 1.25rem;
+//     margin: 0 auto 1rem;
+//     max-width: 1200px;
+//     padding: 0.5rem 1.5rem;
+// }
+
+// .chat-type p {
+//     border-radius: 1.15rem;
+//     line-height: 1.25;
+//     max-width: 75%; // Ensure this is set
+//     padding: 0.5rem 0.875rem;
+//     position: relative;
+//     word-wrap: break-word;
+//     margin: 0.5rem 0;
+//     width: fit-content; // Ensure this is included
+// }
+
+// .chat-type p::before,
+// .chat-type p::after {
+//     bottom: -0.1rem;
+//     content: "";
+//     height: 1rem;
+//     position: absolute;
+// }
+
+// p.from-me {
+//     align-self: flex-end; // Ensures sent messages align to the right
+//     background-color: $primary;
+//     color: #fff;
+// }
+
+// p.from-me::before {
+//     border-bottom-left-radius: 0.8rem 0.7rem;
+//     border-right: 1rem solid $primary;
+//     right: -0.35rem;
+//     transform: translate(0, -0.1rem);
+// }
+
+// p.from-me::after {
+//     background-color: #fff;
+//     border-bottom-left-radius: 0.5rem;
+//     right: -40px;
+//     transform: translate(-30px, -2px);
+//     width: 10px;
+// }
+
+// p.from-them {
+//     background-color: $secondary;
+//     color: #fff;
+// }
+
+// p.from-them::before {
+//     border-bottom-right-radius: 0.8rem 0.7rem;
+//     border-left: 1rem solid $secondary;
+//     left: -0.35rem;
+//     transform: translate(0, -0.1rem);
+// }
+
+// p.from-them::after {
+//     background-color: #fff;
+//     border-bottom-right-radius: 0.5rem;
+//     left: 20px;
+//     transform: translate(-30px, -2px);
+//     width: 10px;
+// }
+
+// p[class^="from-"].emoji {
+//     background: none;
+//     font-size: 2.5rem;
+// }
+
+// p[class^="from-"].emoji::before {
+//     content: none;
+// }
+
+// .no-tail::before {
+//     display: none;
+// }
+
+// .margin-b_none {
+//     margin-bottom: 0 !important;
+// }
+
+// .margin-b_one {
+//     margin-bottom: 1rem !important;
+// }
+
+// .margin-t_one {
+//     margin-top: 1rem !important;
+// }
+
+// /* General Styling */
+// @font-face {
+//     font-family: "SanFrancisco";
+//     src:
+//         url("https://cdn.rawgit.com/AllThingsSmitty/fonts/25983b71/SanFrancisco/sanfranciscodisplay-regular-webfont.woff2") format("woff2"),
+//         url("https://cdn.rawgit.com/AllThingsSmitty/fonts/25983b71/SanFrancisco/sanfranciscodisplay-regular-webfont.woff") format("woff");
+// }
+
+// body {
+//     font-family: -apple-system,
+//     BlinkMacSystemFont,
+//     "Segoe UI",
+//     Roboto,
+//     Oxygen-Sans,
+//     Ubuntu,
+//     Cantarell,
+//     "Helvetica Neue",
+//     sans-serif;
+//     font-weight: normal;
+//     margin: 0;
+// }
+
+// // .container {
+// //     margin: 0 auto;
+// //     max-width: 1200px;
+// //     padding: 1rem;
+// // }
+
+// h1 {
+//     font-weight: normal;
+//     margin-bottom: 0.5rem;
+// }
+
+// h2 {
+//     border-bottom: 1px solid $secondary;
+//     color: #666;
+//     font-weight: normal;
+//     margin-top: 0;
+//     padding-bottom: 1.5rem;
+// }
+
+// .comment {
+//     color: #222;
+//     font-size: 1.25rem;
+//     line-height: 1.5;
+//     margin-bottom: 1.25rem;
+//     max-width: 100%;
+//     padding: 0;
+// }
+
+// @media screen and (max-width: 800px) {
+//     body {
+//         margin: 0 0.5rem;
+//     }
+
+//     .container {
+//         padding: 0.5rem;
+//     }
+
+//     .chat-type {
+//         font-size: 1.05rem;
+//         margin: 0 auto 1rem;
+//         max-width: 600px;
+//         padding: 0.25rem 0.875rem;
+//     }
+
+//     .chat-type p {
+//         margin: 0.5rem 0;
+//     }
+// }
+
+// // Default Theme Colors
+// // All Bootstrap code sourced from https://getbootstrap.com/docs/5.3/getting-started/introduction/
+

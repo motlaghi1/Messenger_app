@@ -1,0 +1,51 @@
+//all bootstrap code sourced from https://getbootstrap.com/docs/5.3/getting-started/introduction/
+
+html 
+    head 
+        title Protected page 
+        link(rel="stylesheet" href="/css/theme.min.css")
+        if message 
+            //creates message box highlighted in red
+            body.text-center 
+                .container-fluid
+                    //center content
+                    .row.justify-content-center
+                        //take up 6 flexbox columns on medium screen, 8 columns on small screen
+                        .col-md-6.col-sm-8
+                            //display loaded message as a red alert
+                            .alert.alert-danger #{message}
+                            //primary color button that redirects to login page
+                            a.btn.btn-primary.btn-lg(href="/login") Login
+        else 
+            body.text-center.bg-light
+                //create container that spans viewport
+                .container-fluid
+                    //center content in container
+                    .row.justify-content-center
+                        //take up 4 flexbox columns /12 on medium screen, 8 on small screens
+                        .col-md-6.col-sm-8
+                            //main content at top of page
+                            //center text and 4 unit bottom margin
+                            h2.text-center.mb-4.mt-4.text-primary Welcome #{id}!
+                            h4.text-center.mb-4 Want to logout?
+
+                            //secondary color button that redirects to login page
+                            a.btn.btn-secondary.btn-lg.mb-2(href="/logout") Logout
+
+                            //spacer to push delete button to bottom
+                            .flex-grow-2 
+
+                            //secondary color button that redirects to edit page
+                            a.btn.btn-secondary.btn-lg(href="/edit_profile") Edit User Info
+                            
+                            .flex-grow-1
+                //create footer
+                footer
+                    //create container spanning viewport
+                    .container-fluid 
+                        //center content
+                        .row.justify-content-center
+                            .mt-auto.pt-5
+                                a.btn.btn-danger.btn-lg(href="/deleteaccount") Delete Account     
+
+                    
