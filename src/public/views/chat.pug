@@ -41,21 +41,7 @@ html(lang="en")
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#dmSearch(type="text" placeholder="Search users...")
                         .contact-list.pt-2#dmList
-                            //- Sample DM contacts
-                            .contact-item.p-3
-                                .d-flex.align-items-center
-                                    .rounded-circle.bg-secondary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
-                                        i.fas.fa-user
-                                    .ms-3
-                                        .fw-semibold John Doe
-                                        .text-muted.small Last message...
-                            .contact-item.p-3
-                                .d-flex.align-items-center
-                                    .rounded-circle.bg-secondary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
-                                        i.fas.fa-user
-                                    .ms-3
-                                        .fw-semibold Jane Smith
-                                        .text-muted.small Online
+ 
 
                 //- Contacts Section (Groups)
                 .col-auto.bg-white.border-end.vh-100.d-none#groupContacts(style="width: 280px;")
@@ -69,21 +55,6 @@ html(lang="en")
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#groupSearch(type="text" placeholder="Search groups...")
                         .contact-list.pt-2#groupList
-                            //- Sample group contacts
-                            .contact-item.p-3
-                                .d-flex.align-items-center
-                                    .rounded-circle.bg-primary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
-                                        i.fas.fa-users
-                                    .ms-3
-                                        .fw-semibold Project Team
-                                        .text-muted.small 5 members
-                            .contact-item.p-3
-                                .d-flex.align-items-center
-                                    .rounded-circle.bg-primary.text-white.d-flex.align-items-center.justify-content-center(style="width: 40px; height: 40px;")
-                                        i.fas.fa-users
-                                    .ms-3
-                                        .fw-semibold Gaming Group
-                                        .text-muted.small 8 members
                 
                 //- Users List
                 .col-auto.bg-white.border-end.vh-100#usersList(style="width: 280px;")
@@ -109,6 +80,8 @@ html(lang="en")
                     .chat-messages.p-3.bg-light
                         #globalChat.chat-type.active
                             //- Messages will be loaded here
+                        #dmChat.chat-type.d-none 
+                        
                         #groupChat.chat-type.d-none
 
 
