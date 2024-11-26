@@ -7,22 +7,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputField = document.getElementById('messageInput');
     const groupModalButton = document.getElementById('saveGroupButton');
     
-    function sendMessage(message, chatId) {
+    function sendMessage(message, chatId, userId) {
         async function getCurrentUser() {
             const response = await fetch('/api/current_user');
             const currentUser = await response.json();
             return currentUser;
         }
-        
+        console.log('\x1b[36m%s\x1b[0m', `socket client chat id: ${chatId}`)
         getCurrentUser().then((user) => {
             displayMessage(
                 formatMessage(message, user.name, Date.now(), true),
             );
-            console.log('chat id: ', chatId);
-            if (!chatId) {
+            console.log('\x1b[36m%s\x1b[0m', `chat id: ${chatId}`);
+            if (chatId === 'global') {
                 socket.emit('send-message', message);
             } else {
-                socket.emit('send-message', message, chatId);
+                socket.emit('send-message', message, chatId, user._id);
             }
         });
     }
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (groupName) {
             // Emit the group name to the server
             socket.emit('join-room', groupName);
-            console.log(`Group "${groupName}" created!`);
+            console.log('\x1b[36m%s\x1b[0m', `Group "${groupName}" created!`);
             
             // Create contact card
             const contactItem = createContactItem({
@@ -55,16 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please enter a group name or cancel.');
         }
     });
-
+    
     sendButton.addEventListener('click', function() {
         const message = inputField.value.trim();
+        console.log('\x1b[32m%s\x1b[0m', `send button pressed with target user = : ${window.targetUserId}`);
         if (message) {
-            sendMessage(message, getCurrentChatId());
+            sendMessage(message, getCurrentChatId(), window.targetUserId); // TODO clear window.targetUserId and start dm emition
             inputField.value = ''; // Clear the input field
         }
     });
 
     socket.on('response', (user, message, chatId) => {
+        console.log('\x1b[36m%s\x1b[0m', 'Receiving Message');
         if (chatId != getCurrentChatId()) { return } // Doesn't need socket if window not open
         displayMessage(
             formatMessage(message, user.name, Date.now(), false)

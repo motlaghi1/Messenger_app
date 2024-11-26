@@ -83,4 +83,9 @@ channelSchema.statics.getChannelMessages = async function(channelId) {
 
 const Channel = mongoose.model("Channel", channelSchema);
 
-module.exports = { Channel };
+async function findChannelById(channelId) {
+    return await Channel.findOne({_id: channelId});
+}
+
+
+module.exports = { Channel, findChannelById };

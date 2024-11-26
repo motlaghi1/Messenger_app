@@ -9,6 +9,8 @@ const userSchema = mongoose.Schema({
     name: String,
     email: String,
     UDid: String,
+    socket_id: {type: String, default: null},
+    isActive: { type: Boolean, default: () => {return socket_id ? true : false}},
     Admin: {type: Boolean, default: false},
     Disabled: {type: Boolean, default: false}
 });
@@ -40,6 +42,10 @@ async function findUser(id, password) {
 // Find user by ID
 async function findUserById(id) {
     return await User.findOne({ id });
+}
+
+async function findUserByHashId(id) {
+    return await User.findOne({ _id: id });
 }
 
 // Add a new user
@@ -74,4 +80,4 @@ async function deleteUser(deletedUserId) {
     return await User.deleteOne({ id: deletedUserId });
 }
 
-module.exports = { User, findUser, findUserById, addUser, updateUser, getUsers, deleteUser };
+module.exports = { User, findUser, findUserById, findUserByHashId, addUser, updateUser, getUsers, deleteUser };
