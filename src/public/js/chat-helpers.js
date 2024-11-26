@@ -139,9 +139,11 @@ export async function loadChannelMessages(channelId) {
         const messages = await response.json();
         
         // Use the currentChatType to determine which container to use
-        const chatContainer = document.getElementById(`${window.currentChatType}Chat`);
-        
+        const chatContainer = document.querySelector('.chat-messages');        
         if (chatContainer) {
+            //smooth scrolling behavior
+            chatContainer.style.scrollBehavior = 'smooth';
+
             chatContainer.innerHTML = messages
                 .map(msg => formatMessage(
                     msg.content, 
@@ -150,8 +152,11 @@ export async function loadChannelMessages(channelId) {
                     msg.sender.id === window.currentUserId
                 ))
                 .join('');
-            
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            //wait until content loaded to scroll to bottom
+            requestAnimationFrame(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
         }
     } catch (error) {
         console.error('Error loading messages:', error);
