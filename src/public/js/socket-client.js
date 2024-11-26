@@ -1,73 +1,56 @@
 import { createContactItem, displayMessage , formatMessage } from './chat-helpers.js';
 import { getCurrentChatId } from './chat.js';
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io();
-    const sendButton = document.getElementById('sendButton');
-    const inputField = document.getElementById('messageInput');
-    const groupModalButton = document.getElementById('saveGroupButton');
     
-    function sendMessage(message, chatId) {
-        async function getCurrentUser() {
-            const response = await fetch('/api/current_user');
-            const currentUser = await response.json();
-            return currentUser;
-        }
-        
-        getCurrentUser().then((user) => {
-            displayMessage(
-                formatMessage(message, user.name, Date.now(), true),
-            );
-            console.log('chat id: ', chatId);
-            if (!chatId) {
-                socket.emit('send-message', message);
-            } else {
-                socket.emit('send-message', message, chatId);
-            }
-        });
-    }
-    
-    groupModalButton.addEventListener('click', function() {
-        const groupNameInput = document.getElementById('groupName');
-        const groupName = groupNameInput.value.trim();
-        const groupList = document.getElementById('groupList');
+    async function sendMessage(message, chatId) {
+        try {
+            const user = await getCurrentUser();
+            const messageData = {
+                content: message,
+                chatId: chatId,
+                timestamp: Date.now()
+            };
 
-        if (groupName) {
-            // Emit the group name to the server
-            socket.emit('join-room', groupName);
-            console.log(`Group "${groupName}" created!`);
-            
-            // Create contact card
-            const contactItem = createContactItem({
-                type: 'group',
-                contactName: groupName,
+            // Display own message immediately
+            displayMessage(
+                formatMessage(message, user.name, messageData.timestamp, true)
+            );
+
+            // Send via socket with retry mechanism
+            socket.emit('chat-message', messageData, (acknowledgement) => {
+                if (!acknowledgement.success) {
+                    console.error('Message failed:', acknowledgement.error);
+                    // Optionally show error to user
+                }
             });
 
-            groupList.appendChild(contactItem);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    }
 
-            // Clear the input field
-            groupNameInput.value = '';
-
-            // Hide the modal using Bootstrap's API
-            const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
-            modal.hide();
-        } else {
-            alert('Please enter a group name or cancel.');
+    socket.on('chat-message', (data) => {
+        if (data.senderId !== window.currentUserId && data.chatId === getCurrentChatId()) {
+            displayMessage(
+                formatMessage(data.content, data.senderName, data.timestamp, false)
+            );
         }
     });
 
-    sendButton.addEventListener('click', function() {
-        const message = inputField.value.trim();
-        if (message) {
-            sendMessage(message, getCurrentChatId());
-            inputField.value = ''; // Clear the input field
+    // Handle reconnection
+    socket.on('connect', () => {
+        const currentChannel = getCurrentChatId();
+        if (currentChannel) {
+            socket.emit('join-room', currentChannel);
         }
     });
 
-    socket.on('response', (user, message, chatId) => {
-        if (chatId != getCurrentChatId()) { return } // Doesn't need socket if window not open
-        displayMessage(
-            formatMessage(message, user.name, Date.now(), false)
-        );
+    // Error handling
+    socket.on('error', (error) => {
+        console.error('Socket error:', error);
+        // Implement retry or fallback mechanism
     });
 });

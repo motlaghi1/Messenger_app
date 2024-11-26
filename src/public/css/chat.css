@@ -141,8 +141,3 @@ body {
 .contact-item:hover .dm-button {
     opacity: 1;
 }
-
-.dm-button:hover {
-    background-color: rgba(109, 84, 184, 0.1) !important;
-    border-radius: 4px;
-}
