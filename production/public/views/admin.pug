@@ -45,12 +45,6 @@ body.text-center.bg-light
                                             input(type="hidden", name="userId", value=user.id)
                                             button.btn.btn-warning(type="submit") #{user.Disabled ? 'Enable' : 'Disable'}
 
-                    //secondary color button that redirects to chat page
-                    a.btn.btn-secondary.btn-lg.mb-2(href="/chat") Chats
-
-                    //spacer to push delete button to bottom
-                    .flex-grow-2 
-
                     // secondary color button that redirects to logout page
                     a.btn.btn-secondary.btn-lg.mb-2(href="/logout") Logout
 
