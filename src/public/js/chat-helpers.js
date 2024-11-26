@@ -12,6 +12,7 @@ export function createContactItem({
     const color = type === 'contact' ? 'bg-secondary' : 'bg-primary';
     
     div.className = `contact-item p-3 position-relative ${isActive ? 'active' : ''}`;
+    div.id = userId ? userId : ''
     
     // Create the main contact item HTML
     let innerHtml = `
@@ -77,13 +78,14 @@ export async function loadDirectMessages() {
             
             channels.forEach(channel => {
                 const otherParticipant = channel.participants.find(p => p.id !== currentUserId);
-                
+                console.log(`OTHER IN CONTACT: ${JSON.stringify(otherParticipant)}`)
                 if (otherParticipant) {
                     const contactItem = createContactItem({
                         type: 'contact',
                         contactName: otherParticipant.name,
-                        subText: 'Direct Message',
+                        subText: (otherParticipant.socket_id) ? 'Online' : 'Offline',
                         channelId: channel._id,
+                        userId: otherParticipant.id,
                         isActive: channel._id === window.currentChannelId
                     });
 

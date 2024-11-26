@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sendButton = document.getElementById('sendButton');
     const inputField = document.getElementById('messageInput');
     const groupModalButton = document.getElementById('saveGroupButton');
+    const logoutButton = document.getElementById('logoutBtn');
     let typingStarted = false;
     
     const response = await fetch('/api/current_user');
@@ -80,6 +81,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Ended typing')
     })
 
+    logoutButton.addEventListener('click', goInactive)
+
     socket.on('response', (user, message, chatId) => {
         if (chatId != getCurrentChatId()) { return } // Doesn't need socket if window not open
         console.log('\x1b[36m%s\x1b[0m', 'Receiving Message');
@@ -100,4 +103,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log(`${user.name} stopped typing...`)
         }
     })
+
+    socket.on('user-status-change', (user, isOnline) => {
+        console.log(`User ${isOnline ? 'Online' : 'Offline'} ${user.name}`)
+        const dmList = document.getElementById('dmList')
+        console.log(document.getElementById('dmList'))
+        if (!dmList) {return;}
+        console.log(user.id)
+        console.log(dmList.querySelector(`[id="${user.id}"]`))
+        const userCard = dmList.querySelector(`[id="${user.id}"]`)
+        if (!userCard) return;
+        console.log(userCard.querySelector('.text-muted.small'))
+        userCard.querySelector('.text-muted.small').innerHTML = isOnline ? 'Online' : 'Offline'
+    })
+
+
+    // Offline after set interval //
+    let timeout;
+    const TIMEOUT_LENGTH_MS = 300000
+    function resetTimer() {
+        clearTimeout(timeout);
+        timeout = setTimeout(goInactive, TIMEOUT_LENGTH_MS);
+        if (socket.connected) return;
+        socket.connect()
+    }
+
+    function goInactive() {
+        // Do something when the user is inactive
+        console.log("User has been inactive for 5 minutes.");
+        socket.disconnect()
+    }
+
+    // Attach event listeners to reset the timer on user activity
+    document.addEventListener("mousemove", resetTimer);
+    document.addEventListener("mousedown", resetTimer);
+    document.addEventListener("keypress", resetTimer);
+    document.addEventListener("scroll", resetTimer);
+
+    // Start the timer initially
+    resetTimer(); 
 });

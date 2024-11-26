@@ -44,7 +44,7 @@ router.get('/api/channels/direct', checkSignIn, async (req, res) => {
         const channels = await Channel.find({
             type: 'direct',
             participants: currentUserId
-        }).populate('participants', 'name _id id');
+        }).populate('participants', 'name _id id socket_id');
         
         res.json(channels);
     } catch (error) {
