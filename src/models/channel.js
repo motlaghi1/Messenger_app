@@ -1,15 +1,7 @@
 const mongoose = require("mongoose");
 
 const channelSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    password: {  
-        type: String,
-        default: null
-    },
+    name: String,
     type: {
         type: String,
         enum: ['global', 'direct', 'group'],
@@ -67,45 +59,16 @@ channelSchema.statics.createDirectMessageChannel = async function(user1Id, user2
     return await dmChannel.save();
 };
 
-channelSchema.statics.createGroupChannel = async function(name, password, creatorId) {
-    const existingChannel = await this.findOne({ name, type: 'group' });
-    if (existingChannel) {
-        throw new Error('Group name already exists');
-    }
-
+channelSchema.statics.createGroupChannel = async function(name, participantIds) {
     const groupChannel = new this({
         name,
         type: 'group',
-        password: password || null,
-        participants: [creatorId],
-        messages: []
+        participants: participantIds,
+        messages: [],
     });
 
     return await groupChannel.save();
 };
-
-channelSchema.statics.joinGroupChannel = async function(name, password, userId) {
-    const channel = await this.findOne({ name, type: 'group' });
-    if (!channel) {
-        throw new Error('Group not found');
-    }
-
-    // Check password only if channel has a password
-    if (channel.password) {
-        if (!password || channel.password !== password) {
-            throw new Error('Incorrect password');
-        }
-    }
-
-    // Add user if not already a participant
-    if (!channel.participants.includes(userId)) {
-        channel.participants.push(userId);
-        await channel.save();
-    }
-    
-    return channel;
-};
-
 
 channelSchema.statics.getChannelMessages = async function(channelId) {
     return await this.findById(channelId)

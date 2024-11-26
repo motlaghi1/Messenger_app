@@ -3,42 +3,39 @@ const { sendMessage } = require('./services/messageService');
 
 module.exports = (io) => {
     io.on('connection', (socket) => {
-        socket.on('chat-message', async (data, callback) => {
+        console.log(`New connection: ${socket.id}`);
+
+        socket.on('send-message', async (data, chatId = 'global') => {
             try {
                 const user = socket.request.session.user;
                 if (!user) {
-                    callback({ success: false, error: 'Not authenticated' });
+                    console.error('User not authenticated');
                     return;
                 }
 
-                // Save to database
-                const message = await sendMessage(data.chatId, data.content, user._id);
+                const message = await sendMessage(chatId, data, user._id);
+                console.log('Message sent:', message);
 
-                // Broadcast to room
-                io.to(data.chatId).emit('chat-message', {
-                    content: data.content,
-                    chatId: data.chatId,
-                    senderId: user._id,
-                    senderName: user.name,
-                    timestamp: data.timestamp,
-                    messageId: message._id
-                });
-
-                callback({ success: true, messageId: message._id });
-
+                // Broadcast the message to other clients
+                if (chatId === 'global') {
+                    socket.broadcast.emit('response', user, data, chatId);
+                    console.log('Emitting to global chat');
+                } else {
+                    io.to(chatId).emit('response', user, data, chatId);
+                    console.log(`Emitting to chat room ${chatId}`);
+                }
             } catch (error) {
-                console.error('Error handling message:', error);
-                callback({ success: false, error: 'Failed to process message' });
+                console.error('Error sending message:', error);
             }
         });
 
-        // Room management
         socket.on('join-room', (room) => {
             socket.join(room);
+            console.log(`Socket ${socket.id} joined room: ${room}`);
         });
-        socket.on('leave-room', (room) => {
-            socket.leave(room);
-            console.log(`Socket ${socket.id} left room: ${room}`);
+
+        socket.on('disconnect', () => {
+            console.log(`Socket disconnected: ${socket.id}`);
         });
     });
 };
