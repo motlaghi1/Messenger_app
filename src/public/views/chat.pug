@@ -26,8 +26,7 @@ html(lang="en")
                             i.fas.fa-users
                         button.btn.rounded-circle.nav-btn#dmBtn(title="Direct Messages" data-chat-type="dm")
                             i.fas.fa-comments
-                        button.btn.rounded-circle.nav-btn#settingsBtn(title="Settings" data-chat-type="settings")
-                            i.fas.fa-cog
+                        
                     .nav.justify-content-center.py-3
                         a.btn.rounded-circle.nav-btn#logoutBtn(href="/logout" title="Logout")
                             i.fas.fa-sign-out-alt
@@ -60,7 +59,7 @@ html(lang="en")
                 .col-auto.bg-white.border-end.vh-100#usersList(style="width: 280px;")
                     .d-flex.flex-column.h-100
                         .p-3.border-bottom
-                            h5.mb-3 Online Users
+                            h5.mb-3 All Users
                             .position-relative
                                 i.fas.fa-search.search-icon
                                 input.form-control.search-input#userSearch(type="text" placeholder="Search users...")
@@ -72,9 +71,7 @@ html(lang="en")
                     .border-bottom.p-3.bg-white
                         .d-flex.justify-content-between.align-items-center
                             h5#currentChat.mb-0 Global Chat
-                            button.btn.btn-outline-primary.btn-sm#refreshBtn(style="--bs-btn-color: #6D54B8; --bs-btn-border-color: #6D54B8; --bs-btn-hover-bg: #6D54B8; --bs-btn-hover-border-color: #6D54B8;")
-                                i.fas.fa-sync-alt.me-1
-                                | Refresh
+                            
 
                     //- Chat Messages Area
                     .chat-messages.p-3.bg-light

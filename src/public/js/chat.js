@@ -84,7 +84,6 @@ async function loadUsers() {
                     const contactItem = createContactItem({
                         type: 'contact',
                         contactName: user.name,
-                        subText: 'Online',
                         userId: user._id,
                         showDmButton: true
                     });

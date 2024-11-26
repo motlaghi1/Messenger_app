@@ -1,9 +1,9 @@
-import { createContactItem, formatMessage } from "./chat-helpers.js";
+import { createContactItem, formatMessage, loadDirectMessages, loadGroupChats, loadChannelMessages } from "./chat-helpers.js";
 
 // State Management
-let currentChatType = 'global';
-let currentChatId = null;
-let currentUserId = null;
+window.currentChatType = 'global';
+window.currentChannelId = 'global';
+window.currentUserId = null;
 
 // DOM Elements
 const navButtons = document.querySelectorAll('[data-chat-type]');
@@ -17,36 +17,17 @@ const usersList = document.getElementById('usersList');
 const globalUsersList = document.getElementById('globalUsersList');
 const refreshButton = document.getElementById('refreshBtn');
 
-// Load channel messages
-async function loadChannelMessages(channelId) {
-    try {
-        const response = await fetch(`/api/channels/${channelId}/messages`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch messages');
-        }
-        const messages = await response.json();
-        
-        const chatContainer = document.querySelector(`#${currentChatType}Chat`);
-        if (chatContainer) {
-            chatContainer.innerHTML = messages.map(msg => 
-                formatMessage(msg.content, msg.sender.name, msg.timestamp, msg.sender.id === currentUserId)
-            ).join('');
-            
-            // Scroll to bottom
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-    } catch (error) {
-        console.error('Error loading messages:', error);
-    }
-}
 
 // Chat Switching Function
-async function switchChat(chatType) {
+async function switchChat(chatType, channelId = null, specificUser = null) {
+    // Update state
+    window.currentChatType = chatType;
+    window.currentChannelId = channelId || (chatType === 'global' ? 'global' : null);
+    
     // Reset navigation buttons
     navButtons.forEach(btn => {
         btn.classList.remove('active');
     });
-    console.log(chatType);
     
     // Activate clicked button
     const activeButton = document.querySelector(`[data-chat-type="${chatType}"]`);
@@ -65,101 +46,87 @@ async function switchChat(chatType) {
         usersList.classList.toggle('d-none', chatType !== 'global');
     }
 
-    // Show appropriate chat
+    // Show appropriate chat container and hide others
     chatTypes.forEach(chat => {
         chat.classList.toggle('d-none', chat.id !== `${chatType}Chat`);
         chat.classList.toggle('active', chat.id === `${chatType}Chat`);
     });
 
-    // Update title
+    // Update title based on chat type
     if (currentChatTitle) {
         currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-                                    chatType === 'groups' ? 'Select a Group' : 
-                                    'Select a Conversation';
+                                     chatType === 'group' ? 'Select a Group' : 
+                                     'Select a Conversation';
     }
 
-    // Update state
-    currentChatType = chatType;
-    currentChatId = chatType === 'global' ? 'global' : null;
-
-    // Load messages if it's global chat
+    // Load appropriate content based on chat type
     if (chatType === 'global') {
         await loadUsers();
-        await loadChannelMessages('global'); // TODO: LOAD ALL CHATS ON SWITCH
+        await loadChannelMessages('global');
+    } else if (chatType === 'dm') {
+        await loadDirectMessages();
+        if (!specificUser) {
+            // Auto-select first DM only if no specific user was selected
+            const firstDM = document.querySelector('#dmList .contact-item');
+            if (firstDM) {
+                firstDM.click();
+            }
+        }
+    } else if (chatType === 'group') {
+        await loadGroupChats();
+        if (!channelId) {
+            // Auto-select first group only if no specific channel was selected
+            const firstGroup = document.querySelector('#groupList .contact-item');
+            if (firstGroup) {
+                firstGroup.click();
+            }
+        }
     }
 }
 
-// Initialize everything when DOM loads
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        console.log('Initializing chat...');
-        
-        // Create global channel if it doesn't exist
-        const response = await fetch('/api/channels', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                type: 'global'
-            })
+function setupSearchFunctionality() {
+    // Setup DM search
+    const dmSearch = document.getElementById('dmSearch');
+    if (dmSearch) {
+        dmSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#dmList');
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to create global channel');
-        }
-
-        // Get current user info
-        const userResponse = await fetch('/api/current-user');
-        if (userResponse.ok) {
-            const userData = await userResponse.json();
-            currentUserId = userData.id;
-            console.log('Current user ID:', currentUserId);
-        }
-        console.log(navButtons)
-        // Set up event listeners for nav buttons
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                console.log('init nav buttons')
-                const chatType = button.dataset.chatType;
-                if (['global', 'group', 'dm'].includes(chatType)) {
-                    switchChat(chatType);
-                }
-            });
-        });
-
-        // Set up refresh button
-        if (refreshButton) {
-            refreshButton.addEventListener('click', () => {
-                if (currentChatId) {
-                    loadChannelMessages(currentChatId);
-                }
-            });
-        }
-
-        // Set up message input handlers
-        if (messageInput && sendButton) {
-
-            // Enter key handler
-            messageInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendButton.click();
-                }
-            });
-        }
-
-        // Initialize search functionality
-        setupSearch('dmSearch', 'dmList');
-        setupSearch('groupSearch', 'groupList');
-        setupUserSearch();
-
-        // Start with global chat
-        await switchChat('global');
-    } catch (error) {
-        console.error('Error initializing chat:', error);
     }
-});
+
+    // Setup group search
+    const groupSearch = document.getElementById('groupSearch');
+    if (groupSearch) {
+        groupSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#groupList');
+        });
+    }
+
+    // Setup global users search
+    const userSearch = document.getElementById('userSearch');
+    if (userSearch) {
+        userSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#globalUsersList');
+        });
+    }
+}
+
+function filterContacts(searchTerm, listSelector) {
+    const list = document.querySelector(listSelector);
+    if (!list) return;
+
+    const contacts = list.getElementsByClassName('contact-item');
+    const term = searchTerm.toLowerCase().trim();
+
+    Array.from(contacts).forEach(contact => {
+        const name = contact.querySelector('.fw-semibold').textContent.toLowerCase();
+        const subtext = contact.querySelector('.text-muted') ? 
+            contact.querySelector('.text-muted').textContent.toLowerCase() : '';
+        
+        const matches = name.includes(term) || subtext.includes(term);
+        contact.style.display = matches ? '' : 'none';
+    });
+}
+
 
 // Load users function
 async function loadUsers() {
@@ -168,17 +135,19 @@ async function loadUsers() {
         const users = await response.json();
         
         if (globalUsersList) {
-            // Clear existing content
             globalUsersList.innerHTML = '';
-
-            // Append each contact item
+            
             users.forEach(user => {
-                const contactItem = createContactItem({
-                    type: 'contact',
-                    contactName: user.name,
-                    subText: user.id,
-                });
-                globalUsersList.appendChild(contactItem);
+                if (user.id !== currentUserId) {
+                    const contactItem = createContactItem({
+                        type: 'contact',
+                        contactName: user.name,
+                        subText: 'Online',
+                        userId: user._id,
+                        showDmButton: true
+                    });
+                    globalUsersList.appendChild(contactItem);
+                }
             });
         }
     } catch (error) {
@@ -186,50 +155,226 @@ async function loadUsers() {
     }
 }
 
-// Search functionality
-function setupSearch(searchId, listId) {
-    const searchInput = document.getElementById(searchId);
-    const list = document.getElementById(listId);
-    
-    if (searchInput && list) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = list.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
+// Initialize everything when DOM loads
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        console.log('Initializing chat...');
+
+        const socket = io();
+        
+        // Get current user info first
+        const userResponse = await fetch('/api/current-user');
+        if (userResponse.ok) {
+            const userData = await userResponse.json();
+            window.currentUserId = userData.id;
+            console.log('Current user ID:', window.currentUserId);
+        }
+
+        // Set up event listeners for nav buttons
+        navButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const chatType = button.dataset.chatType;
+                if (['global', 'group', 'dm'].includes(chatType)) {
+                    await switchChat(chatType);
+                }
             });
         });
+
+        // Initialize search functionality
+        setupSearchFunctionality();
+
+        // Set up message input handlers
+        if (messageInput && sendButton) {
+            sendButton.addEventListener('click', async () => {
+                const message = messageInput.value.trim();
+                if (message && window.currentChannelId) {
+                    await sendMessage(message, window.currentChannelId);
+                    messageInput.value = '';
+                }
+            });
+
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendButton.click();
+                }
+            });
+        }
+
+        // Set up refresh button
+        if (refreshButton) {
+            refreshButton.addEventListener('click', async () => {
+                if (window.currentChannelId) {
+                    await loadChannelMessages(window.currentChannelId);
+                }
+            });
+        }
+
+        // Initialize group modal
+        initializeGroupModal(socket);
+
+        // Initialize chat
+        await switchChat('global');
+
+        
+    } catch (error) {
+        console.error('Error initializing chat:', error);
+    }
+});
+
+async function sendMessage(message, channelId) {
+    if (!channelId) return;
+
+    try {
+        const response = await fetch(`/api/channels/${channelId}/messages`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: message })
+        });
+
+        if (!response.ok) throw new Error('Failed to send message');
+
+        // Load updated messages for the current channel
+        await loadChannelMessages(window.currentChannelId);
+    } catch (error) {
+        console.error('Error sending message:', error);
     }
 }
 
-// Setup search for all users
-function setupUserSearch() {
-    const userSearch = document.getElementById('userSearch');
-    if (userSearch && globalUsersList) {
-        userSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = globalUsersList.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+function initializeGroupModal(socket) {
+    const groupForm = document.getElementById('groupForm');
+    const makePrivateCheckbox = document.getElementById('makePrivate');
+    const passwordField = document.querySelector('.password-field');
+    const groupAction = document.getElementById('groupAction');
+    const createOnlyFields = document.querySelectorAll('.create-only');
+    const joinPasswordHint = document.querySelector('.join-password-hint');
+    const passwordInput = document.getElementById('groupPassword');
+
+    // Toggle password field based on private checkbox
+    makePrivateCheckbox?.addEventListener('change', function() {
+        passwordField.classList.toggle('d-none', !this.checked);
+        passwordInput.required = this.checked;
+    });
+
+    // Toggle fields based on action
+    groupAction?.addEventListener('change', function() {
+        const isCreate = this.value === 'create';
+        createOnlyFields.forEach(field => {
+            field.classList.toggle('d-none', !isCreate);
         });
-    }
+        
+        passwordField.classList.toggle('d-none', isCreate && !makePrivateCheckbox.checked);
+        joinPasswordHint.classList.toggle('d-none', isCreate);
+        passwordInput.required = isCreate && makePrivateCheckbox.checked;
+    });
+
+    // Handle form submission
+    groupForm?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const action = groupAction.value;
+        const groupName = document.getElementById('groupName').value.trim();
+        const makePrivate = makePrivateCheckbox?.checked || false;
+        const groupPassword = passwordInput.value.trim();
+
+        if (!groupName) {
+            alert('Please enter a group name.');
+            return;
+        }
+
+        if (action === 'create' && makePrivate && !groupPassword) {
+            alert('Please enter a password for private group.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/channels', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'group',
+                    name: groupName,
+                    password: groupPassword || null,
+                    action: action
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error);
+            }
+
+            const channel = await response.json();
+            
+            // Add channel to UI
+            const groupList = document.getElementById('groupList');
+            const contactItem = createContactItem({
+                type: 'group',
+                contactName: channel.name,
+                subText: `${channel.participants.length} members${channel.password ? ' • Private' : ' • Public'}`,
+                channelId: channel._id
+            });
+
+            // Add click handler for the channel
+            contactItem.addEventListener('click', async () => {
+                window.currentChannelId = channel._id;
+                window.currentChatType = 'group';
+                
+                // Update UI active states
+                document.querySelectorAll('.contact-item').forEach(item => 
+                    item.classList.remove('active'));
+                contactItem.classList.add('active');
+
+                // Update chat title
+                const currentChatTitle = document.getElementById('currentChat');
+                if (currentChatTitle) {
+                    currentChatTitle.textContent = channel.name;
+                }
+
+                // Show correct chat container
+                document.querySelectorAll('.chat-type').forEach(chat => {
+                    chat.classList.add('d-none');
+                    chat.classList.remove('active');
+                });
+                
+                const groupChat = document.getElementById('groupChat');
+                if (groupChat) {
+                    groupChat.classList.remove('d-none');
+                    groupChat.classList.add('active');
+                }
+
+                // Join socket room
+                socket.emit('join-room', channel._id);
+                
+                // Load messages
+                await loadChannelMessages(channel._id);
+            });
+
+            groupList.appendChild(contactItem);
+
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
+            modal.hide();
+            this.reset();
+            passwordField.classList.add('d-none');
+
+            // Join socket room
+            socket.emit('join-room', channel._id);
+
+            // Switch to the new channel
+            contactItem.click();
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
 }
 
-export function getCurrentChatId () {
-    return currentChatId;
+
+export function getCurrentChatId() {
+    return currentChannelId;
 }
-
-// Auto refresh messages periodically
-// setInterval(() => { // TODO: REMOVE INTERVAL RELOAD
-//     if (currentChatId) {
-//         loadChannelMessages(currentChatId);
-//     }
-// }, 5000); // Refresh every 5 seconds
-
-// // Auto refresh users list periodically
-// setInterval(loadUsers, 30000); // Refresh every 30 seconds
