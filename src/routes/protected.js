@@ -24,9 +24,7 @@ const checkSignIn = (req, res, next) => {
     if (req.session.user) {
         return next();
     } else {
-        const err = new Error("Not logged in!");
-        err.status = 400;
-        return next(err);
+        res.redirect('/login');
     }
 };
 
