@@ -35,7 +35,6 @@ body {
 
 .message {
     max-width: 75%;
-    border-radius: 6px;
 }
 
 .message.sent {
@@ -141,4 +140,9 @@ body {
 
 .contact-item:hover .dm-button {
     opacity: 1;
+}
+
+.dm-button:hover {
+    background-color: rgba(109, 84, 184, 0.1) !important;
+    border-radius: 4px;
 }

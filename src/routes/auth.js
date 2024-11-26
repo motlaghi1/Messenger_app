@@ -19,7 +19,6 @@ router.post('/login', async (req, res) => {
 
     try {
         const user = await userModel.findUserById(id);
-        console.log(user);
         if (!user) {
             return res.render('login', { message: "Invalid credentials!!" });
         }
@@ -76,7 +75,7 @@ router.post('/signup', async (req, res) => {
 router.get('/logout', (req, res) => {
     const userId = req.session.user?.id;
     req.session.destroy(() => {
-        console.log(`${userId} logged out.`);
+        console.log('\x1b[36m%s\x1b[0m', `${userId} logged out.`);
     });
     res.redirect('/login');
 });
@@ -87,7 +86,7 @@ router.get('/deleteaccount', (req, res) => {
     userModel.deleteUser(userId);
     
     req.session.destroy(() => {
-        console.log(`${userId} deleted.`);
+        console.log('\x1b[36m%s\x1b[0m', `${userId} deleted.`);
     });
     res.redirect('/signup');
 });

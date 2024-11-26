@@ -2,13 +2,13 @@
 const { Channel } = require('../models/channel');
 const { Message } = require('../models/message');
 
-async function sendMessage(channelId, content, senderId) {
+async function sendMessageToChannel(channelId, content, senderId) {
     const channel = channelId === 'global'
         ? await Channel.findOne({ type: 'global' })
         : await Channel.findById(channelId);
 
     if (!channel) {
-        throw new Error('Channel not found');
+        throw new Error(`Channel ${channelId} not found`);
     }
 
     const message = new Message({
@@ -28,4 +28,4 @@ async function sendMessage(channelId, content, senderId) {
     return populatedMessage;
 }
 
-module.exports = { sendMessage };
+module.exports = { sendMessageToChannel };
