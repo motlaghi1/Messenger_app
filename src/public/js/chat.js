@@ -19,7 +19,7 @@ const refreshButton = document.getElementById('refreshBtn');
 
 
 // Chat Switching Function
-async function switchChat(chatType, channelId = null) {
+async function switchChat(chatType, channelId = null, specificUser = null) {
     // Update state
     window.currentChatType = chatType;
     window.currentChannelId = channelId || (chatType === 'global' ? 'global' : null);
@@ -65,19 +65,66 @@ async function switchChat(chatType, channelId = null) {
         await loadChannelMessages('global');
     } else if (chatType === 'dm') {
         await loadDirectMessages();
-        // Auto-select first DM
-        const firstDM = document.querySelector('#dmList .contact-item');
-        if (firstDM) {
-            firstDM.click();
+        if (!specificUser) {
+            // Auto-select first DM only if no specific user was selected
+            const firstDM = document.querySelector('#dmList .contact-item');
+            if (firstDM) {
+                firstDM.click();
+            }
         }
     } else if (chatType === 'group') {
         await loadGroupChats();
-        // Auto-select first group
-        const firstGroup = document.querySelector('#groupList .contact-item');
-        if (firstGroup) {
-            firstGroup.click();
+        if (!channelId) {
+            // Auto-select first group only if no specific channel was selected
+            const firstGroup = document.querySelector('#groupList .contact-item');
+            if (firstGroup) {
+                firstGroup.click();
+            }
         }
     }
+}
+
+function setupSearchFunctionality() {
+    // Setup DM search
+    const dmSearch = document.getElementById('dmSearch');
+    if (dmSearch) {
+        dmSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#dmList');
+        });
+    }
+
+    // Setup group search
+    const groupSearch = document.getElementById('groupSearch');
+    if (groupSearch) {
+        groupSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#groupList');
+        });
+    }
+
+    // Setup global users search
+    const userSearch = document.getElementById('userSearch');
+    if (userSearch) {
+        userSearch.addEventListener('input', function() {
+            filterContacts(this.value, '#globalUsersList');
+        });
+    }
+}
+
+function filterContacts(searchTerm, listSelector) {
+    const list = document.querySelector(listSelector);
+    if (!list) return;
+
+    const contacts = list.getElementsByClassName('contact-item');
+    const term = searchTerm.toLowerCase().trim();
+
+    Array.from(contacts).forEach(contact => {
+        const name = contact.querySelector('.fw-semibold').textContent.toLowerCase();
+        const subtext = contact.querySelector('.text-muted') ? 
+            contact.querySelector('.text-muted').textContent.toLowerCase() : '';
+        
+        const matches = name.includes(term) || subtext.includes(term);
+        contact.style.display = matches ? '' : 'none';
+    });
 }
 
 
@@ -132,6 +179,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
+
+        // Initialize search functionality
+        setupSearchFunctionality();
 
         // Set up message input handlers
         if (messageInput && sendButton) {
@@ -324,39 +374,6 @@ function initializeGroupModal(socket) {
     });
 }
 
-
-// Search functionality
-function setupSearch(searchId, listId) {
-    const searchInput = document.getElementById(searchId);
-    const list = document.getElementById(listId);
-    
-    if (searchInput && list) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = list.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-}
-
-function setupUserSearch() {
-    const userSearch = document.getElementById('userSearch');
-    if (userSearch && globalUsersList) {
-        userSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = globalUsersList.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-}
 
 export function getCurrentChatId() {
     return currentChannelId;
