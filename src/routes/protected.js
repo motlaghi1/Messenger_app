@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { Channel } = require('../models/channel');
 const { Message } = require('../models/message');
-const { sendMessageToChannel } = require('../services/messageService'); 
+const { sendMessage } = require('../services/messageService'); 
 const {User, findUser, findUserById, addUser, updateUser, getUsers, deleteUser} = require('../models/user');
 
 
@@ -108,7 +108,7 @@ router.post('/api/channels/:channelId/messages', checkSignIn, async (req, res) =
         const channelId = req.params.channelId;
         const content = req.body.content;
 
-        const message = await sendMessageToChannel(channelId, content, senderId);
+        const message = await sendMessage(channelId, content, senderId);
 
         res.json(message);
     } catch (error) {
