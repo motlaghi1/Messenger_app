@@ -40,26 +40,6 @@ app.set('views', path.join(__dirname, '../src/public/views'));
 app.use('/css', express.static(path.join(__dirname, '../src/public/css')));
 app.use('/js', express.static(path.join(__dirname, '../src/public/js')));
 
-// Logging middleware for tracking current users
-
-const userModel = require('./models/user');
-app.use('/', async (req, res, next) => {
-    try {
-        const users = await userModel.getUsers();
-        const cur_users = users.map(user => (user.id + "  ")).join('');
-        console.log("Registered users: ", cur_users);
-    
-        if (req.session.user) {
-            console.log(`Current user: ${req.session.user.id}`);
-        } else {
-            console.log("Current user: Not set");
-        }
-    } catch (error) {
-        console.log("Error fetching users: ", error);
-    }
-    next(); // Ensure next middleware is called
-});
-
 // Routes
 app.use('/', auth);
 app.use('/', protected);

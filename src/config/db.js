@@ -7,7 +7,7 @@ const dbname = "MessageApp";
 const uri = `mongodb+srv://${uname}:${psword}@${cluster}.mongodb.net/${dbname}?retryWrites=true&w=majority`;
 
 const mongoose = require('mongoose'); 
-const mongoose_settings = { useNewUrlParser: true, useUnifiedTopology: true };
+const mongoose_settings = {};
 
 mongoose.connect(uri, mongoose_settings);
 const db = mongoose.connection;
