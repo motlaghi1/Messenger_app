@@ -1,6 +1,7 @@
 {
-  "name": "testingdirectmessages",
+  "name": "globalmessagetest",
   "version": "1.0.0",
+  "description": "testoffinalmessagefeatures",
   "main": "index.js",
   "dependencies": {
     "abbrev": "^1.1.1",
