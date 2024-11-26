@@ -53,8 +53,13 @@ module.exports = (io) => {
             console.log('\x1b[36m%s\x1b[0m', `Socket ${socket.id} joined room: ${room}`);
         });
 
-        socket.on('start-dm', (userId) => {
-            console.log('\x1b[32m%s\x1b[0m', 'Server start dm activated')
+        socket.on('user-typing-change', (user, chatId, isTyping) => {
+            if (isTyping) {
+                console.log(`User typing ${user.name}`)
+            } else {
+                console.log(`User stopped typing ${user.name}`)
+            }
+            socket.broadcast.emit('user-typing-change', user, chatId, isTyping);
         })
 
         socket.on('disconnect', () => {
