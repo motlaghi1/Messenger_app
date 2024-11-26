@@ -91,34 +91,33 @@ html(lang="en")
                                 | Send
 
         //- Modal for creating a group
-        div.modal#groupModal(
-            tabindex="-1",
-            aria-labelledby="groupModalLabel",
-            aria-hidden="true"
-            )
+        div.modal#groupModal(tabindex="-1" aria-labelledby="groupModalLabel" aria-hidden="true")
             div.modal-dialog
                 div.modal-content
                     div.modal-header
-                        h5.modal-title#groupModalLabel Create New Group
-                        button.btn-close(
-                        type="button",
-                        data-bs-dismiss="modal",
-                        aria-label="Close"
-                        )
+                        h5.modal-title#groupModalLabel Create/Join Group Chat
+                        button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
                     div.modal-body
                         form#groupForm
-                        div.mb-3
-                            label(for="groupName") Group Name
-                            input#groupName.form-control(
-                            type="text",
-                            placeholder="Enter group name"
-                            )
-                    div.modal-footer
-                        button.btn.btn-secondary(
-                        type="button",
-                        data-bs-dismiss="modal"
-                        ) Cancel
-                        button#saveGroupButton.btn.btn-primary(type="button") Save
+                            div.mb-3
+                                label.form-label(for="groupAction") Action
+                                select#groupAction.form-control
+                                    option(value="create") Create New Group
+                                    option(value="join") Join Existing Group
+                            div.mb-3
+                                label.form-label(for="groupName") Group Name
+                                input#groupName.form-control(type="text" placeholder="Enter group name" required)
+                            div.mb-3.create-only
+                                div.form-check.mb-2
+                                    input#makePrivate.form-check-input(type="checkbox")
+                                    label.form-check-label(for="makePrivate") Make this a private group
+                            div.mb-3.password-field.d-none
+                                label.form-label(for="groupPassword") Password
+                                input#groupPassword.form-control(type="password" placeholder="Enter password")
+                                small.form-text.text-muted.join-password-hint.d-none Leave empty for public groups
+                            div.modal-footer
+                                button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancel
+                                button#saveGroupButton.btn.btn-primary(type="submit") Create/Join Group
 
 
         script(src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js")
