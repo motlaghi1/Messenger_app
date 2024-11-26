@@ -26,7 +26,7 @@ messageSchema.statics.createMessage = async function(channelId, senderId, conten
     const savedMessage = await message.save();
 
     // Update the channel with the new message
-    await mongoose.model('Channel').findByIdAndUpdate(
+    await mongoose.model('Channel').findById(
         channelId,
         { 
             $push: { messages: savedMessage._id },

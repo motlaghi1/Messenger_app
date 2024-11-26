@@ -55,8 +55,8 @@ async function switchChat(chatType, channelId = null) {
     // Update title
     if (currentChatTitle) {
         currentChatTitle.textContent = chatType === 'global' ? 'Global Chat' : 
-                                     chatType === 'group' ? 'Select a Group' : 
-                                     'Select a Conversation';
+                                    chatType === 'group' ? 'Select a Group' : 
+                                    'Select a Conversation';
     }
 
     // Load appropriate content based on chat type
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userResponse.ok) {
             const userData = await userResponse.json();
             window.currentUserId = userData.id;
-            console.log('Current user ID:', window.currentUserId);
+            console.log('\x1b[36m%s\x1b[0m', `Current user ID: ${window.currentUserId}`);
         }
 
         // Set up event listeners for nav buttons

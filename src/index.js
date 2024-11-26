@@ -11,7 +11,7 @@ const path = require('path');
 const http = require('http');
 const server = http.createServer(app);
 const socketIO = require('socket.io');
-const io = socketIO(server); // Changed this line
+const io = socketIO(server);
 const db = require('./config/db');
 
 const socketHandler = require('./socket-server');

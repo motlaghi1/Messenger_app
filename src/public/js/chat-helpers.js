@@ -54,6 +54,7 @@ export function createContactItem({
         dmButton.addEventListener('click', async (e) => {
             e.stopPropagation();
             const userId = dmButton.dataset.userId;
+            console.log('\x1b[36m%s\x1b[0m', `dm button creation with id: ${userId}`)
             await initiateDM(userId);
         });
     }
@@ -221,33 +222,7 @@ export async function loadGroupChats() {
 }
 
 export function displayMessage(messageContent) {
-    // const activeBox = document.querySelector(".chat-type.active")
-    // const now = new Date();
-    // const timestamp = now.toLocaleTimeString();
-    // const messageItem = document.createElement("div");
-
-    // const messageClasses = type === 'sent'
-    //     ? 'message sent p-3 mb-3'
-    //     : 'message received shadow-sm p-3 mb-3';
-
-    // const timestampClass = type === 'sent'
-    //     ? 'text-white-50 small mt-1'
-    //     : 'text-muted small mt-1';
-
-    // const senderHTML = type !== 'sent'
-    //     ? `<div class="fw-semibold">${user.name}</div>`
-    //     : '';
-
-    // // Build the inner HTML using a template literal
-    // messageItem.innerHTML = `
-    //     <div class="message ${messageClasses}">
-    //         ${senderHTML}
-    //         <div>${message}</div>
-    //         <div class="${timestampClass}">${timestamp}</div>
-    //     </div>
-    // `;
-    // return messageItem;
-    console.log('tryna socket post')
+    console.log('\x1b[36m%s\x1b[0m', 'tryna socket post')
     const activeBox = document.querySelector(".chat-type.active")
     const div =  document.createElement("div");
     div.innerHTML = messageContent;
@@ -261,7 +236,7 @@ export function formatMessage(message, sender, timestamp, isSentByCurrentUser) {
         hour: 'numeric', 
         minute: '2-digit' 
     });
-    console.log('making the message element')
+    console.log('\x1b[36m%s\x1b[0m', 'making the message element')
     return `
         <div class="message ${isSentByCurrentUser ? 'sent bg-primary' : 'received bg-secondary shadow-sm'} p-3 mb-3">
             ${!isSentByCurrentUser ? `<div class="fw-semibold">${sender}</div>` : ''}
