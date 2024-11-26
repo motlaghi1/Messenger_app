@@ -252,7 +252,7 @@ export async function loadChannelMessages(channelId) {
 }
 
 // Update initiateDM function
-export async function initiateDM(userId) {
+async function initiateDM(userId) {
     try {
         const response = await fetch('/api/channels', {
             method: 'POST',
@@ -287,7 +287,6 @@ export async function initiateDM(userId) {
                 dmItem.click();
             }
         }
-
     } catch (error) {
         console.error('Error creating DM:', error);
     }
