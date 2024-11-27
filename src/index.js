@@ -39,7 +39,6 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, './public/views'));
 app.use('/css', express.static(path.join(__dirname, './public/css')));
 app.use('/js', express.static(path.join(__dirname, './public/js')));
-app.use('/images', express.static(path.join(__dirname, './public/images')));
 
 // Routes
 app.use('/', auth);
