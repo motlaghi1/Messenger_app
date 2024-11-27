@@ -446,20 +446,6 @@ export function displayMessage(messageContent) {
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
 }
 
-export function showIsTyping(user) {
-    if (!user) return;
-    const activeBox = document.querySelector(".chat-type.active")
-    const div =  document.createElement("div");
-    div.innerHTML = `
-        <div class="typing-indicator other">
-            ${user.name} is typing...
-        </div>
-    `
-    activeBox.appendChild(div);
-    const chatMessagesContainer = document.querySelector('.chat-messages');
-    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-}
-
 export function formatMessage(message, sender, timestamp, isSentByCurrentUser) {
     const messageTime = new Date(timestamp).toLocaleTimeString([], { 
         hour: 'numeric', 
