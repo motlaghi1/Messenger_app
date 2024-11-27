@@ -15,6 +15,7 @@ export function createContactItem({
     if (channelId) {
         div.dataset.channelId = channelId;
     }
+    div.id = userId ? userId : ''
     
     // Create the main contact item HTML
     let innerHtml = `
@@ -165,13 +166,14 @@ export async function loadDirectMessages() {
             
             channels.forEach(channel => {
                 const otherParticipant = channel.participants.find(p => p.id !== currentUserId);
-                
+                console.log(`OTHER IN CONTACT: ${JSON.stringify(otherParticipant)}`)
                 if (otherParticipant) {
                     const contactItem = createContactItem({
                         type: 'contact',
                         contactName: otherParticipant.name,
-                        subText: 'Direct Message',
+                        subText: (otherParticipant.socket_id) ? 'Online' : 'Offline',
                         channelId: channel._id,
+                        userId: otherParticipant.id,
                         isActive: channel._id === window.currentChannelId
                     });
 
@@ -439,6 +441,20 @@ export function displayMessage(messageContent) {
     const activeBox = document.querySelector(".chat-type.active")
     const div =  document.createElement("div");
     div.innerHTML = messageContent;
+    activeBox.appendChild(div);
+    const chatMessagesContainer = document.querySelector('.chat-messages');
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+export function showIsTyping(user) {
+    if (!user) return;
+    const activeBox = document.querySelector(".chat-type.active")
+    const div =  document.createElement("div");
+    div.innerHTML = `
+        <div class="typing-indicator other">
+            ${user.name} is typing...
+        </div>
+    `
     activeBox.appendChild(div);
     const chatMessagesContainer = document.querySelector('.chat-messages');
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;

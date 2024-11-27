@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             sendButton.addEventListener('click', async () => {
                 const message = messageInput.value.trim();
                 if (message && window.currentChannelId) {
-                    await sendMessage(message, window.currentChannelId);
+                    sendButton.click()
                     messageInput.value = '';
                 }
             });
@@ -157,27 +157,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error initializing chat:', error);
     }
 });
-
-async function sendMessage(message, channelId) {
-    if (!channelId) return;
-
-    try {
-        const response = await fetch(`/api/channels/${channelId}/messages`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ content: message })
-        });
-
-        if (!response.ok) throw new Error('Failed to send message');
-
-        // Load updated messages for the current channel
-        await loadChannelMessages(window.currentChannelId);
-    } catch (error) {
-        console.error('Error sending message:', error);
-    }
-}
 
 function initializeGroupModal() {
     const groupForm = document.getElementById('groupForm');

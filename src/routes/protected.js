@@ -19,14 +19,13 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
-// Middleware to check if the user is signed in
+// Middleware to check if the user is signed inn
 const checkSignIn = (req, res, next) => {
     if (req.session.user) {
         return next();
     } else {
-        const err = new Error("Not logged in!");
-        err.status = 400;
-        return next(err);
+        res.redirect('/login');
+        next();
     }
 };
 
@@ -46,7 +45,7 @@ router.get('/api/channels/direct', checkSignIn, async (req, res) => {
         const channels = await Channel.find({
             type: 'direct',
             participants: currentUserId
-        }).populate('participants', 'name _id id');
+        }).populate('participants', 'name _id id socket_id');
         
         res.json(channels);
     } catch (error) {
