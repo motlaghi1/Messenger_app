@@ -10,7 +10,6 @@ const userSchema = mongoose.Schema({
     email: String,
     UDid: String,
     socket_id: {type: String, default: null},
-    isActive: { type: Boolean, default: () => {return socket_id ? true : false}},
     Admin: {type: Boolean, default: false},
     Disabled: {type: Boolean, default: false}
 });

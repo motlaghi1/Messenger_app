@@ -2,7 +2,6 @@ export function createContactItem({
     type = 'group',
     contactName = 'Contact Name',
     subText = type === 'group' ? '1 member' : '',
-    isActive = false,
     channelId = null,
     userId = null,
     showDmButton = false
@@ -11,7 +10,7 @@ export function createContactItem({
     const iconClass = type === 'contact' ? 'fas fa-user' : 'fas fa-users';
     const color = type === 'contact' ? 'bg-secondary' : 'bg-primary';
     
-    div.className = `contact-item p-3 position-relative ${isActive ? 'active' : ''}`;
+    div.className = `contact-item p-3 position-relative`;
     if (channelId) {
         div.dataset.channelId = channelId;
     }
@@ -174,7 +173,6 @@ export async function loadDirectMessages() {
                         subText: (otherParticipant.socket_id) ? 'Online' : 'Offline',
                         channelId: channel._id,
                         userId: otherParticipant.id,
-                        isActive: channel._id === window.currentChannelId
                     });
 
                     contactItem.addEventListener('click', async () => {
@@ -302,7 +300,6 @@ export async function loadGroupChats() {
                     contactName: channel.name,
                     subText: `${channel.participants.length} members${channel.password ? ' • Private' : ' • Public'}`,
                     channelId: channel._id,
-                    isActive: channel._id === window.currentChannelId
                 });
 
                 // Add click handler for channel selection
