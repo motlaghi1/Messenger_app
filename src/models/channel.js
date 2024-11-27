@@ -1,11 +1,19 @@
 const mongoose = require("mongoose");
 
 const channelSchema = new mongoose.Schema({
-    name: String,
-    type: {
+    name: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    password: {  
+        type: String,
+        default: null
+    },
+    type: {  
         type: String,
         enum: ['global', 'direct', 'group'],
-        required: true,
+        required: true
     },
     participants: [{ 
         type: mongoose.Schema.Types.ObjectId, 
@@ -59,15 +67,59 @@ channelSchema.statics.createDirectMessageChannel = async function(user1Id, user2
     return await dmChannel.save();
 };
 
-channelSchema.statics.createGroupChannel = async function(name, participantIds) {
-    const groupChannel = new this({
-        name,
-        type: 'group',
-        participants: participantIds,
-        messages: [],
-    });
+channelSchema.statics.createGroupChannel = async function(name, password, userId) {
+    try {
+        // Check if group already exists
+        const existingChannel = await this.findOne({ name, type: 'group' });
+        if (existingChannel) {
+            throw new Error('Group name already exists');
+        }
 
-    return await groupChannel.save();
+        // Create new group channel
+        const groupChannel = new this({
+            name: name,
+            type: 'group',  // Make sure type is set
+            password: password || null,
+            participants: [userId],
+            messages: []
+        });
+
+        console.log('Creating group channel:', groupChannel); // Add logging
+        const savedChannel = await groupChannel.save();
+        console.log('Saved channel:', savedChannel); // Add logging
+        return savedChannel;
+    } catch (error) {
+        console.error('Error creating group channel:', error);
+        throw error;
+    }
+};
+
+channelSchema.statics.joinGroupChannel = async function(name, password, userId) {
+    try {
+        const channel = await this.findOne({ name, type: 'group' });
+        if (!channel) {
+            throw new Error('Group not found');
+        }
+
+        // Check password if the group is private
+        if (channel.password && channel.password !== password) {
+            throw new Error('Incorrect password');
+        }
+
+        // Check if user is already a participant
+        if (channel.participants.includes(userId)) {
+            throw new Error('Already a member of this group');
+        }
+
+        // Add user to participants
+        channel.participants.push(userId);
+        await channel.save();
+
+        return channel;
+    } catch (error) {
+        console.error('Error joining group channel:', error);
+        throw error;
+    }
 };
 
 channelSchema.statics.getChannelMessages = async function(channelId) {

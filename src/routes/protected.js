@@ -24,7 +24,9 @@ const checkSignIn = (req, res, next) => {
     if (req.session.user) {
         return next();
     } else {
-        res.redirect('/login');
+        const err = new Error("Not logged in!");
+        err.status = 400;
+        return next(err);
     }
 };
 
@@ -117,68 +119,116 @@ router.post('/api/channels/:channelId/messages', checkSignIn, async (req, res) =
     }
 });
 
+router.post('/api/channels/:channelId/leave', checkSignIn, async (req, res) => {
+    try {
+        const channelId = req.params.channelId;
+        const userId = new mongoose.Types.ObjectId(req.session.user._id);
+
+        const channel = await Channel.findById(channelId);
+        if (!channel) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+
+        if (channel.type !== 'group') {
+            return res.status(400).json({ error: 'Can only leave group channels' });
+        }
+
+        // Remove user from participants
+        channel.participants = channel.participants.filter(p => !p.equals(userId));
+        await channel.save();
+
+        res.json({ message: 'Successfully left group' });
+    } catch (error) {
+        console.error('Error leaving group:', error);
+        res.status(500).json({ error: 'Failed to leave group' });
+    }
+});
+
+router.delete('/api/channels/:channelId', checkSignIn, async (req, res) => {
+    try {
+        const channelId = req.params.channelId;
+        const userId = new mongoose.Types.ObjectId(req.session.user._id);
+
+        const channel = await Channel.findById(channelId);
+        if (!channel) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+
+        if (channel.type !== 'direct') {
+            return res.status(400).json({ error: 'Can only delete direct message channels' });
+        }
+
+        // Verify user is a participant
+        if (!channel.participants.some(p => p.equals(userId))) {
+            return res.status(403).json({ error: 'Not authorized to delete this channel' });
+        }
+
+        // Delete all messages in the channel
+        await Message.deleteMany({ _id: { $in: channel.messages } });
+        
+        // Delete the channel
+        await Channel.findByIdAndDelete(channelId);
+
+        res.json({ message: 'Channel deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting channel:', error);
+        res.status(500).json({ error: 'Failed to delete channel' });
+    }
+});
+
+
 router.post('/api/channels', checkSignIn, async (req, res) => {
     try {
-        const { type, name, participants } = req.body;
+        const { type, name, password, action } = req.body;
         let channel;
+
+        const userId = new mongoose.Types.ObjectId(req.session.user._id);
 
         switch (type) {
             case 'global':
                 channel = await Channel.findOne({ type: 'global' });
                 if (!channel) {
-                    channel = await new Channel({
-                        name: 'Global Chat',
-                        type: 'global',
-                        participants: [],
-                        messages: []
-                    }).save();
+                    channel = await Channel.createGlobalChannel();
                 }
                 break;
 
             case 'direct':
-                if (!participants || participants.length !== 1) {
-                    return res.status(400).json({ error: 'Direct messages require exactly 1 participant' });
+                if (!req.body.participants || !req.body.participants.length) {
+                    return res.status(400).json({ error: 'Direct messages require a participant' });
                 }
 
-                const participantId = new mongoose.Types.ObjectId(participants[0]);
-                const currentUserId = new mongoose.Types.ObjectId(req.session.user._id);
-
+                const participantId = new mongoose.Types.ObjectId(req.body.participants[0]);
+                
                 // Get the other participant's name for the channel name
                 const otherUser = await User.findById(participantId);
                 if (!otherUser) {
                     return res.status(404).json({ error: 'User not found' });
                 }
 
-                // Check for existing DM channel
-                channel = await Channel.findOne({
-                    type: 'direct',
-                    participants: { 
-                        $all: [currentUserId, participantId],
-                        $size: 2
-                    }
-                });
-
-                if (!channel) {
-                    channel = await new Channel({
-                        name: `Chat with ${otherUser.name}`, // Use other participant's name
-                        type: 'direct',
-                        participants: [currentUserId, participantId],
-                        messages: []
-                    }).save();
-                }
+                // Create or get existing DM channel
+                channel = await Channel.createDirectMessageChannel(userId, participantId);
                 break;
 
             case 'group':
-                if (!name || !participants || participants.length < 2) {
-                    return res.status(400).json({ error: 'Group channels require a name and at least 2 participants' });
+                if (!name) {
+                    return res.status(400).json({ error: 'Group name is required' });
                 }
-                const participantIds = participants.map(id => new mongoose.Types.ObjectId(id));
-                channel = await new Channel({
-                    name,
-                    type: 'group',
-                    participants: [new mongoose.Types.ObjectId(req.session.user._id), ...participantIds],
-                    messages: []
-                }).save();
+
+                if (action === 'create') {
+                    try {
+                        channel = await Channel.createGroupChannel(name, password, userId);
+                    } catch (error) {
+                        return res.status(400).json({ error: error.message });
+                    }
+                } else if (action === 'join') {
+                    try {
+                        channel = await Channel.joinGroupChannel(name, password, userId);
+                    } catch (error) {
+                        return res.status(400).json({ error: error.message });
+                    }
+                } else {
+                    return res.status(400).json({ error: 'Invalid action for group channel' });
+                }
                 break;
 
             default:
@@ -188,11 +238,14 @@ router.post('/api/channels', checkSignIn, async (req, res) => {
         // Populate the participants before sending response
         channel = await channel.populate('participants', 'name _id id');
         res.json(channel);
+
     } catch (error) {
-        console.error('Error creating channel:', error);
-        res.status(500).json({ error: 'Failed to create channel' });
+        console.error('Error creating/joining channel:', error);
+        res.status(500).json({ error: error.message || 'Failed to create/join channel' });
     }
 });
+
+
 
 router.get('/api/users', checkSignIn, async (req, res) => {
     try {

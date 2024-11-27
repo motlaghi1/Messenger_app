@@ -101,6 +101,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Initializing chat...');
         
+        window.socket = io();
+
         // Get current user info first
         const userResponse = await fetch('/api/current-user');
         if (userResponse.ok) {
@@ -146,6 +148,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        initializeGroupModal();
+
         // Initialize chat
         await switchChat('global');
         
@@ -175,35 +179,158 @@ async function sendMessage(message, channelId) {
     }
 }
 
-// Search functionality
-function setupSearch(searchId, listId) {
-    const searchInput = document.getElementById(searchId);
-    const list = document.getElementById(listId);
-    
-    if (searchInput && list) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = list.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    }
-}
+function initializeGroupModal() {
+    const groupForm = document.getElementById('groupForm');
+    const makePrivateCheckbox = document.getElementById('makePrivate');
+    const passwordField = document.querySelector('.password-field');
+    const groupAction = document.getElementById('groupAction');
+    const createOnlyFields = document.querySelectorAll('.create-only');
+    const joinPasswordHint = document.querySelector('.join-password-hint');
+    const passwordInput = document.getElementById('groupPassword');
+    const saveGroupButton = document.getElementById('saveGroupButton');
+    const groupNameInput = document.getElementById('groupName');
+    document.getElementById('groupName').value.trim();
 
-function setupUserSearch() {
-    const userSearch = document.getElementById('userSearch');
-    if (userSearch && globalUsersList) {
-        userSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const items = globalUsersList.getElementsByClassName('contact-item');
-            
-            Array.from(items).forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(searchTerm) ? '' : 'none';
+    // Toggle password field based on private checkbox
+    makePrivateCheckbox?.addEventListener('change', function() {
+        passwordField?.classList.toggle('d-none', !this.checked);
+        if (passwordInput) {
+            passwordInput.required = this.checked;
+        }
+    });
+
+    // Toggle fields based on action
+    groupAction?.addEventListener('change', function() {
+        const isCreate = this.value === 'create';
+        createOnlyFields.forEach(field => {
+            field.classList.toggle('d-none', !isCreate);
+        });
+        
+        if (!isCreate) {
+            if (passwordField) passwordField.classList.remove('d-none');
+            if (joinPasswordHint) joinPasswordHint.classList.remove('d-none');
+            if (passwordInput) passwordInput.required = false;
+        } else {
+            if (passwordField) {
+                passwordField.classList.toggle('d-none', !makePrivateCheckbox?.checked);
+            }
+            if (joinPasswordHint) joinPasswordHint.classList.add('d-none');
+            if (passwordInput && makePrivateCheckbox) {
+                passwordInput.required = makePrivateCheckbox.checked;
+            }
+        }
+
+        if (saveGroupButton) {
+            saveGroupButton.textContent = isCreate ? 'Create Group' : 'Join Group';
+        }
+    });
+
+    // Handle form submission
+    groupForm?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const action = groupAction.value;
+        const groupName = groupNameInput.value.trim();
+        const makePrivate = makePrivateCheckbox?.checked || false;
+        const groupPassword = passwordInput?.value?.trim() || null;
+
+        if (!groupName) {
+            alert('Please enter a group name.');
+            return;
+        }
+
+        if (action === 'create' && makePrivate && !groupPassword) {
+            alert('Please enter a password for private group.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/channels', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    type: 'group',
+                    name: groupName,
+                    password: groupPassword,
+                    action: action
+                })
             });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to create/join group');
+            }
+
+            const channel = await response.json();
+            console.log('Channel created/joined:', channel);
+
+            // Add channel to UI
+            const groupList = document.getElementById('groupList');
+            if (!groupList) {
+                console.error('Group list element not found');
+                return;
+            }
+
+            const contactItem = createContactItem({
+                type: 'group',
+                contactName: channel.name,
+                subText: `${channel.participants.length} members${channel.password ? ' • Private' : ' • Public'}`,
+                channelId: channel._id
+            });
+
+            groupList.appendChild(contactItem);
+
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
+            if (modal) {
+                modal.hide();
+                groupForm.reset();
+                passwordField?.classList.add('d-none');
+                joinPasswordHint?.classList.add('d-none');
+            }
+
+            // Switch to the new channel
+            window.currentChannelId = channel._id;
+            window.currentChatType = 'group';
+            
+            // Update UI states
+            document.querySelectorAll('.contact-item').forEach(item => 
+                item.classList.remove('active'));
+            contactItem.classList.add('active');
+
+            // Update chat title
+            const currentChatTitle = document.getElementById('currentChat');
+            if (currentChatTitle) {
+                currentChatTitle.textContent = channel.name;
+            }
+
+            // Show correct chat container
+            document.querySelectorAll('.chat-type').forEach(chat => {
+                chat.classList.add('d-none');
+                chat.classList.remove('active');
+            });
+            
+            const groupChat = document.getElementById('groupChat');
+            if (groupChat) {
+                groupChat.classList.remove('d-none');
+                groupChat.classList.add('active');
+            }
+
+            // Load messages
+            await loadChannelMessages(channel._id);
+
+        } catch (error) {
+            console.error('Error details:', error);
+            alert(error.message || `Failed to ${action} group`);
+        }
+    });
+
+    // Set up socket listener for group updates
+    if (window.socket) {
+        window.socket.on('group-updated', async () => {
+            await loadGroupChats();
         });
     }
 }

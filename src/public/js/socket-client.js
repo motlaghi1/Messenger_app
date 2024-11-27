@@ -27,34 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    groupModalButton.addEventListener('click', function() {
-        const groupNameInput = document.getElementById('groupName');
-        const groupName = groupNameInput.value.trim();
-        const groupList = document.getElementById('groupList');
-
-        if (groupName) {
-            // Emit the group name to the server
-            socket.emit('join-room', groupName);
-            console.log('\x1b[36m%s\x1b[0m', `Group "${groupName}" created!`);
-            
-            // Create contact card
-            const contactItem = createContactItem({
-                type: 'group',
-                contactName: groupName,
-            });
-
-            groupList.appendChild(contactItem);
-
-            // Clear the input field
-            groupNameInput.value = '';
-
-            // Hide the modal using Bootstrap's API
-            const modal = bootstrap.Modal.getInstance(document.getElementById('groupModal'));
-            modal.hide();
-        } else {
-            alert('Please enter a group name or cancel.');
-        }
-    });
     
     sendButton.addEventListener('click', function() {
         const message = inputField.value.trim();
@@ -71,5 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         displayMessage(
             formatMessage(message, user.name, Date.now(), false)
         );
+    });
+
+    //room joined event
+    socket.on('room-joined', (roomId) => {
+        console.log('\x1b[36m%s\x1b[0m', `Joined room: ${roomId}`);
     });
 });

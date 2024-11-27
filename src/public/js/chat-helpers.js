@@ -12,11 +12,14 @@ export function createContactItem({
     const color = type === 'contact' ? 'bg-secondary' : 'bg-primary';
     
     div.className = `contact-item p-3 position-relative ${isActive ? 'active' : ''}`;
+    if (channelId) {
+        div.dataset.channelId = channelId;
+    }
     
     // Create the main contact item HTML
     let innerHtml = `
         <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center flex-grow-1">
+            <div class="d-flex align-items-center flex-grow-1 contact-content">
                 <div class="rounded-circle ${color} text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                     <i class="${iconClass}"></i>
                 </div>
@@ -24,42 +27,127 @@ export function createContactItem({
                     <div class="fw-semibold">${contactName}</div>
                     <div class="text-muted small">${subText}</div>
                 </div>
-            </div>`;
-    
-    // Add DM button if showDmButton is true
+            </div>
+            <div class="action-buttons" style="display: none;">`;
+
+    // Add appropriate button based on type
+    if (type === 'group' && channelId) {
+        innerHtml += `
+            <button class="btn btn-link text-danger p-1 leave-button" 
+                    title="Leave Group" 
+                    data-channel-id="${channelId}">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>`;
+    } else if (type === 'contact' && channelId && !showDmButton) {
+        innerHtml += `
+            <button class="btn btn-link text-danger p-1 delete-button" 
+                    title="Delete Conversation" 
+                    data-channel-id="${channelId}">
+                <i class="fas fa-trash"></i>
+            </button>`;
+    }
+
     if (showDmButton) {
         innerHtml += `
             <button class="btn btn-link text-primary p-1 dm-button" 
                     title="Start Direct Message" 
-                    data-user-id="${userId}"
-                    style="display: none;">
+                    data-user-id="${userId}">
                 <i class="fas fa-comments"></i>
             </button>`;
     }
-    
-    innerHtml += `</div>`;
+
+    innerHtml += `</div></div>`;
     div.innerHTML = innerHtml;
 
-    // Add hover events for DM button
-    if (showDmButton) {
-        const dmButton = div.querySelector('.dm-button');
-        div.addEventListener('mouseenter', () => {
-            dmButton.style.display = 'block';
-        });
-        div.addEventListener('mouseleave', () => {
-            dmButton.style.display = 'none';
-        });
+    // Add hover events for action buttons
+    const actionButtons = div.querySelector('.action-buttons');
+    div.addEventListener('mouseenter', () => {
+        actionButtons.style.display = 'block';
+    });
+    div.addEventListener('mouseleave', () => {
+        actionButtons.style.display = 'none';
+    });
 
-        // Add click handler for DM button
+    // Handle click events
+    div.addEventListener('click', async (e) => {
+        // Don't trigger click if clicking on buttons
+        if (e.target.closest('.action-buttons')) {
+            return;
+        }
+
+        // Handle channel selection
+        if (channelId && !showDmButton) {
+            await handleChannelSelection(div, channelId, type, contactName);
+        }
+    });
+
+    // Add button click handlers
+    const leaveButton = div.querySelector('.leave-button');
+    const deleteButton = div.querySelector('.delete-button');
+    const dmButton = div.querySelector('.dm-button');
+
+    if (leaveButton) {
+        leaveButton.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const channelId = leaveButton.dataset.channelId;
+            await handleLeaveGroup(channelId, div);
+        });
+    }
+
+    if (deleteButton) {
+        deleteButton.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const channelId = deleteButton.dataset.channelId;
+            await handleDeleteDM(channelId, div);
+        });
+    }
+
+    if (dmButton) {
         dmButton.addEventListener('click', async (e) => {
             e.stopPropagation();
             const userId = dmButton.dataset.userId;
-            console.log('\x1b[36m%s\x1b[0m', `dm button creation with id: ${userId}`)
             await initiateDM(userId);
         });
     }
 
     return div;
+}
+
+async function handleChannelSelection(element, channelId, type, contactName) {
+    // Set the current channel and chat type
+    window.currentChannelId = channelId;
+    window.currentChatType = type === 'group' ? 'group' : 'dm';
+
+    // Update UI active states
+    document.querySelectorAll('.contact-item').forEach(item => 
+        item.classList.remove('active'));
+    element.classList.add('active');
+
+    // Update chat title
+    const currentChatTitle = document.getElementById('currentChat');
+    if (currentChatTitle) {
+        currentChatTitle.textContent = contactName;
+    }
+
+    // Show correct chat container
+    document.querySelectorAll('.chat-type').forEach(chat => {
+        chat.classList.add('d-none');
+        chat.classList.remove('active');
+    });
+    
+    const chatContainer = document.getElementById(`${window.currentChatType}Chat`);
+    if (chatContainer) {
+        chatContainer.classList.remove('d-none');
+        chatContainer.classList.add('active');
+    }
+
+    // Join socket room if it's a group chat
+    if (type === 'group' && window.chatSocket) {
+        window.chatSocket.emit('join-room', channelId);
+    }
+    
+    // Load messages
+    await loadChannelMessages(channelId);
 }
 
 export async function loadDirectMessages() {
@@ -210,14 +298,139 @@ export async function loadGroupChats() {
                 const contactItem = createContactItem({
                     type: 'group',
                     contactName: channel.name,
-                    subText: `${channel.participants.length} members`,
-                    channelId: channel._id
+                    subText: `${channel.participants.length} members${channel.password ? ' • Private' : ' • Public'}`,
+                    channelId: channel._id,
+                    isActive: channel._id === window.currentChannelId
                 });
+
+                // Add click handler for channel selection
+                contactItem.addEventListener('click', async () => {
+                    window.currentChannelId = channel._id;
+                    window.currentChatType = 'group';
+
+                    // Update UI active states
+                    document.querySelectorAll('.contact-item').forEach(item => 
+                        item.classList.remove('active'));
+                    contactItem.classList.add('active');
+
+                    // Update chat title
+                    const currentChatTitle = document.getElementById('currentChat');
+                    if (currentChatTitle) {
+                        currentChatTitle.textContent = channel.name;
+                    }
+
+                    // Show correct chat container
+                    document.querySelectorAll('.chat-type').forEach(chat => {
+                        chat.classList.add('d-none');
+                        chat.classList.remove('active');
+                    });
+                    
+                    const groupChat = document.getElementById('groupChat');
+                    if (groupChat) {
+                        groupChat.classList.remove('d-none');
+                        groupChat.classList.add('active');
+                        groupChat.innerHTML = ''; // Clear previous messages
+                    }
+
+                    // Join socket room
+                    if (window.chatSocket) {
+                        window.chatSocket.emit('join-room', channel._id);
+                    }
+                    
+                    // Load messages
+                    await loadChannelMessages(channel._id);
+                });
+
                 groupList.appendChild(contactItem);
             });
+
+            // If we're in group chat type and no channel is selected, select the first one
+            if (window.currentChatType === 'group' && !window.currentChannelId) {
+                const firstGroup = groupList.querySelector('.contact-item');
+                if (firstGroup) {
+                    firstGroup.click();
+                }
+            }
         }
     } catch (error) {
         console.error('Error loading groups:', error);
+    }
+}
+
+async function handleLeaveGroup(channelId, element) {
+    if (!channelId) return;
+    if (!confirm('Are you sure you want to leave this group?')) return;
+
+    try {
+        const response = await fetch(`/api/channels/${channelId}/leave`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to leave group');
+        }
+
+        // Remove the channel from UI
+        element.remove();
+
+        // Reset chat if this was the active channel
+        if (window.currentChannelId === channelId) {
+            const groupChat = document.getElementById('groupChat');
+            if (groupChat) {
+                groupChat.innerHTML = '';
+                window.currentChannelId = null;
+                document.getElementById('currentChat').textContent = 'Select a Group';
+            }
+        }
+
+        // Leave socket room if socket exists
+        if (window.socket) {
+            window.socket.emit('leave-room', channelId);
+        }
+
+    } catch (error) {
+        console.error('Error leaving group:', error);
+        alert(error.message || 'Failed to leave group');
+    }
+}
+
+async function handleDeleteDM(channelId, element) {
+    if (!channelId) return;
+    if (!confirm('Are you sure you want to delete this conversation?')) return;
+
+    try {
+        const response = await fetch(`/api/channels/${channelId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete conversation');
+        }
+
+        // Remove the channel from UI
+        element.remove();
+
+        // Reset chat if this was the active channel
+        if (window.currentChannelId === channelId) {
+            const dmChat = document.getElementById('dmChat');
+            if (dmChat) {
+                dmChat.innerHTML = '';
+                window.currentChannelId = null;
+                document.getElementById('currentChat').textContent = 'Select a Conversation';
+            }
+        }
+
+    } catch (error) {
+        console.error('Error deleting conversation:', error);
+        alert(error.message || 'Failed to delete conversation');
     }
 }
 
