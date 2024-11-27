@@ -198,6 +198,12 @@ This use case describes the process of a user editing their existing user inform
 1. Unauthorized user tried to go to /admin page
 
 2. Unauthorized user is redirected to the login page with a message saying they are forbidden from accessing the admin page.
+
 ---
+
+### UI Rationale
+
+The "Yapper" messenger app follows a common messenger application layout with three sections. The left most panel is the navigation bar, which contains buttons with different functionality such as profile, logout, and different chat types(Global, Group Chat, and Direct Messages). The section on the right of the navigation bar is the contact list, lets call it the side bar. and the main section contains the actual chat window, displaying messages with sender information, timestamps,, and content. Messages from current user appears on the right in the primary color, while received messages appears on the left in the secondary color. At the bottom of the chat window is the input area with a text field and send button. When user is in global chat, the side bar on the left displays all the user in this app. If you want to build a direct message channel with one of the users, just simply hover over it and a direct message button will populate. Clicking that will redirect you to the Direct message chats and load up your chat histories. In Direct messages, the sidebar will populate all the users and their status that you had a direct message with. You could always choose to delete this user from the list by simply hover over and click on the delete button. For group chats, users can create or join groups through a modal dialog, with options for public or private (password-protected) groups. The interface uses Bootstrap's utility classes for spacing, flexbox layouts, and responsive design.  
+
 
 *All Bootstrap styling code sourced from https://getbootstrap.com/docs/5.3/getting-started/introduction/*
